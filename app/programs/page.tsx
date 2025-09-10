@@ -1,6 +1,7 @@
 import { createServer } from "@/utils/supabase/server";
 import Image from "next/image";
 import Link from "next/link";
+import PageWrapper from "@/components/PageWrapper";
 
 // Define program categories
 const programCategories = [
@@ -63,8 +64,9 @@ export default async function ProgramsPage() {
   });
 
   return (
-    <div className="space-y-16">
-      {/* Hero Section */}
+    <PageWrapper>
+      <div className="space-y-16">
+        {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-green-700 to-green-900 -mx-4 px-4 py-16 text-white rounded-b-3xl">
         <div className="container mx-auto max-w-4xl text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">Our Programs</h1>
@@ -237,5 +239,6 @@ export default async function ProgramsPage() {
         </Link>
       </section>
     </div>
+    </PageWrapper>
   );
 }

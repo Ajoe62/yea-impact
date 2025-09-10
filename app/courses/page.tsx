@@ -2,6 +2,7 @@ import { createServer } from "@/utils/supabase/server";
 import Link from "next/link";
 import Image from "next/image";
 import AnimatedSection from "@/components/AnimatedSection";
+import PageWrapper from "@/components/PageWrapper";
 
 interface Course {
   id: string;
@@ -54,19 +55,20 @@ export default async function CoursesPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <AnimatedSection animation="fadeIn">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-green-700 mb-4">
-            Digital Skills Courses
-          </h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Enhance your digital skills with our professionally designed
-            courses. From beginner to advanced, we offer learning paths to help
-            you achieve your goals.
-          </p>
-        </div>
-      </AnimatedSection>
+    <PageWrapper>
+      <div className="container mx-auto px-4 py-12">
+        <AnimatedSection animation="fadeIn">
+          <div className="text-center mb-12">
+            <h1 className="text-3xl font-bold text-green-700 mb-4">
+              Digital Skills Courses
+            </h1>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Enhance your digital skills with our professionally designed
+              courses. From beginner to advanced, we offer learning paths to help
+              you achieve your goals.
+            </p>
+          </div>
+        </AnimatedSection>
 
       {/* Featured courses section */}
       {courses?.some((course) => course.featured) && (
@@ -318,5 +320,6 @@ export default async function CoursesPage() {
         </AnimatedSection>
       </section>
     </div>
+    </PageWrapper>
   );
 }

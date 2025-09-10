@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { login, signup } from './actions';
+import PageWrapper from '@/components/PageWrapper';
 
 /**
  * LoginPage component
@@ -33,7 +34,8 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen px-4 py-8 bg-gray-50">
+    <PageWrapper>
+      <main className="flex flex-col items-center justify-center min-h-screen px-4 py-8 bg-gray-50">
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-green-700">
@@ -149,5 +151,6 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
+    </PageWrapper>
   );
 }

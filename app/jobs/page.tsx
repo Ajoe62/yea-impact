@@ -2,6 +2,7 @@ import { createServer } from "@/utils/supabase/server";
 import Link from "next/link";
 import Image from "next/image";
 import AnimatedSection from "@/components/AnimatedSection";
+import PageWrapper from "@/components/PageWrapper";
 
 export default async function JobsPage() {
   const supabase = createServer();
@@ -36,8 +37,9 @@ export default async function JobsPage() {
   };
 
   return (
-    <div className="space-y-16 pb-16">
-      {/* Hero Section */}
+    <PageWrapper>
+      <div className="space-y-16 pb-16">
+        {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-blue-700 to-purple-700 text-white py-16 px-4 rounded-2xl overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <svg
@@ -573,5 +575,6 @@ export default async function JobsPage() {
         </AnimatedSection>
       </section>
     </div>
+    </PageWrapper>
   );
 }

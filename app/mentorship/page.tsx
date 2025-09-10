@@ -2,6 +2,7 @@ import { createServer } from '@/utils/supabase/server';
 import Image from 'next/image';
 import Link from 'next/link';
 import AnimatedSection from '@/components/AnimatedSection';
+import PageWrapper from '@/components/PageWrapper';
 
 // Helper function to safely get display name from profiles
 function getDisplayName(mentor: any): string {
@@ -72,8 +73,9 @@ export default async function MentorshipPage() {
   });
 
   return (
-    <div className="space-y-16">
-      {/* Hero Section */}
+    <PageWrapper>
+      <div className="space-y-16">
+        {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-green-50 opacity-80"></div>
         <div className="absolute inset-0">
@@ -631,5 +633,6 @@ export default async function MentorshipPage() {
         </div>
       </section>
     </div>
+    </PageWrapper>
   );
 }

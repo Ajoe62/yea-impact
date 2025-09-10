@@ -36,16 +36,14 @@ export default function PageWrapper({
   }, []);
 
   return (
-    <ResponsiveLayout>
-      <div
-        className={`min-h-[calc(100vh-var(--header-height,64px)-var(--footer-height,120px))] ${className}`}
-        style={{
-          minHeight:
-            "calc(100vh - var(--header-height,64px) - var(--footer-height,120px))",
-        }}
-      >
-        {children}
-      </div>
-    </ResponsiveLayout>
+    <div
+      className={`min-h-[calc(100vh-var(--header-height,64px)-var(--footer-height,120px))] ${className}`}
+      style={{
+        minHeight:
+          "calc(100vh - var(--header-height,64px) - var(--footer-height,120px))",
+      }}
+    >
+      {children}
+    </div>
   );
 }

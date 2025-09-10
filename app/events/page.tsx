@@ -2,6 +2,7 @@ import { createServer } from '@/utils/supabase/server';
 import Link from 'next/link';
 import Image from 'next/image';
 import AnimatedSection from '@/components/AnimatedSection';
+import PageWrapper from '@/components/PageWrapper';
 
 export default async function EventsPage() {
   const supabase = createServer();
@@ -41,8 +42,9 @@ export default async function EventsPage() {
   };
 
   return (
-    <div className="space-y-16 pb-16">
-      {/* Hero Section */}
+    <PageWrapper>
+      <div className="space-y-16 pb-16">
+        {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-green-600 to-blue-600 text-white py-16 px-4 rounded-2xl overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -277,5 +279,6 @@ export default async function EventsPage() {
         </AnimatedSection>
       </section>
     </div>
+    </PageWrapper>
   );
 }
