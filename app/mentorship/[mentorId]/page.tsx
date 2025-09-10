@@ -5,7 +5,7 @@ import Link from "next/link";
 import RequestForm from "./request-form";
 
 interface MentorDetailProps {
-  params: { mentorId: string };
+  params: Promise<{ mentorId: string }>;
 }
 
 /**
@@ -15,13 +15,14 @@ interface MentorDetailProps {
  * requests.
  */
 export default async function MentorDetailPage({ params }: MentorDetailProps) {
+  const { mentorId } = await params;
   const supabase = createServer();
   const { data: mentor } = await supabase
     .from("mentors")
     .select(
       "id, bio, expertise, years_experience, education, achievements, available_hours, profile_image, social_links, area, location, languages, profiles:profiles(display_name)"
     )
-    .eq("id", params.mentorId)
+    .eq("id", mentorId)
     .single();
 
   if (!mentor) {

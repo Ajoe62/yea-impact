@@ -13,7 +13,7 @@ interface AnimatedSectionProps {
 }
 
 interface JobPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 interface Job {
@@ -42,13 +42,14 @@ interface Job {
  * with a unique constraint on (job_id, applicant_id).
  */
 export default async function JobDetailPage({ params }: JobPageProps) {
+  const { id } = await params;
   const supabase = createServer();
   const { data: job } = (await supabase
     .from("jobs")
     .select(
       "id, title, company, description, deadline, posted_by, location, job_type, salary_range, company_logo, skills, experience_level, remote, requirements, responsibilities, benefits, company_description"
     )
-    .eq("id", params.id)
+    .eq("id", id)
     .single()) as { data: Job | null };
 
   if (!job) {

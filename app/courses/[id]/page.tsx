@@ -4,9 +4,28 @@ import EnrollmentForm from "./enroll-form";
 import Link from "next/link";
 import Image from "next/image";
 import AnimatedSection from "@/components/AnimatedSection";
+import { Metadata } from "next";
 
-interface CoursePageProps {
-  params: { id: string };
+// Metadata for the course detail page
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const supabase = createServer();
+  const { data: course } = await supabase
+    .from("courses")
+    .select("name")
+    .eq("id", id)
+    .single();
+
+  return {
+    title: course?.name
+      ? `${course.name} | YEA Impact`
+      : "Course Details | YEA Impact",
+    description: "Learn new skills with our structured courses.",
+  };
 }
 
 interface Course {
@@ -48,7 +67,12 @@ interface Instructor {
  * Course detail page. Fetches a single course and its modules from Supabase.
  * Displays detailed information about the course and allows enrollment.
  */
-export default async function CourseDetailPage({ params }: CoursePageProps) {
+export default async function CourseDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   const supabase = createServer();
   // Fetch the course by ID
   const { data: course } = (await supabase
@@ -56,7 +80,7 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
     .select(
       "id, name, description, difficulty, start_date, duration_weeks, image_url, instructor_id, category, prerequisites, objectives, price, price_currency, featured"
     )
-    .eq("id", params.id)
+    .eq("id", id)
     .single()) as { data: Course | null };
 
   if (!course) {
@@ -69,7 +93,7 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
     .select(
       "id, module_number, title, content_url, description, duration_minutes"
     )
-    .eq("course_id", params.id)
+    .eq("course_id", id)
     .order("module_number", { ascending: true })) as {
     data: CourseModule[] | null;
   };

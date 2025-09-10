@@ -6,7 +6,7 @@ import Image from "next/image";
 import AnimatedSection from "@/components/AnimatedSection";
 
 interface EventPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 /**
@@ -15,13 +15,14 @@ interface EventPageProps {
  * record with a token. The user must be authenticated to register.
  */
 export default async function EventDetailPage({ params }: EventPageProps) {
+  const { id } = await params;
   const supabase = createServer();
   const { data: event } = await supabase
     .from("events")
     .select(
       "id, title, description, event_date, location, image_url, category, organizer, capacity, agenda, speaker_ids"
     )
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (!event) {
