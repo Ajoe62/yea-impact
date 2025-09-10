@@ -1,46 +1,53 @@
 import Link from "next/link";
 import HeroSlider from "@/components/HeroSlider";
 import AnimatedSection from "@/components/AnimatedSection";
+import PageWrapper from "@/components/PageWrapper";
+import ResponsiveGrid, { ResponsiveContainer, ResponsiveSection, ResponsiveCard } from "@/components/ui/ResponsiveGrid";
 
 export default function Home() {
   return (
-    <div className="space-y-20">
-      {/* Hero Section */}
-      <section className="relative bg-green-700 -mx-4 px-4 py-16 sm:py-24 text-white rounded-b-3xl">
-        <div className="container mx-auto grid md:grid-cols-2 gap-8 items-center">
-          <AnimatedSection animation="slideLeft" delay={0.1}>
-            <div className="space-y-6 max-w-xl">
-              <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-                Empowering African Youth for a Brighter Future
-              </h1>
-              <p className="text-lg opacity-90">
-                Youth Empowerment Africa (YEA) is dedicated to empowering young
-                Africans through advocacy, mindset reorientation, and skills
-                development. Join us in our mission to impact 20 million youths
-                across Africa.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Link
-                  href="/programs"
-                  className="px-6 py-3 bg-white text-green-700 rounded-md font-semibold hover:bg-gray-100 transition"
-                >
-                  Our Programs
-                </Link>
-                <Link
-                  href="/courses"
-                  className="px-6 py-3 bg-transparent border border-white rounded-md font-semibold hover:bg-white hover:text-green-700 transition"
-                >
-                  Explore Courses
-                </Link>
+    <PageWrapper>
+      <div className="space-y-16 md:space-y-20">
+        {/* Hero Section - Mobile Optimized */}
+        <section className="relative bg-green-700 -mx-4 px-4 py-12 sm:py-16 md:py-24 text-white rounded-b-3xl">
+          <div className="container mx-auto grid md:grid-cols-2 gap-8 items-center">
+            <AnimatedSection animation="slideLeft" delay={0.1}>
+              <div className="space-y-4 md:space-y-6 max-w-xl">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
+                  Empowering African Youth for a Brighter Future
+                </h1>
+                <p className="text-base sm:text-lg opacity-90">
+                  Youth Empowerment Africa (YEA) is dedicated to empowering young
+                  Africans through advocacy, mindset reorientation, and skills
+                  development. Join us in our mission to impact 20 million youths
+                  across Africa.
+                </p>
+                <div className="flex flex-wrap gap-3 md:gap-4">
+                  <Link
+                    href="/programs"
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-white text-green-700 rounded-md font-semibold hover:bg-gray-100 transition shadow-sm"
+                  >
+                    Our Programs
+                  </Link>
+                  <Link
+                    href="/courses"
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-transparent border border-white rounded-md font-semibold hover:bg-white hover:text-green-700 transition"
+                  >
+                    Explore Courses
+                  </Link>
+                </div>
               </div>
-            </div>
-          </AnimatedSection>
-          <AnimatedSection animation="fadeIn" delay={0.2}>
-            <div className="hidden md:block relative h-96">
-              <HeroSlider />
-            </div>
-          </AnimatedSection>
-        </div>
+            </AnimatedSection>
+            <AnimatedSection animation="fadeIn" delay={0.2}>
+              <div className="hidden md:block relative h-80 lg:h-96">
+                <HeroSlider />
+              </div>
+              {/* Mobile-only smaller slider */}
+              <div className="md:hidden relative h-48 mt-6">
+                <HeroSlider />
+              </div>
+            </AnimatedSection>
+          </div>
         {/* Wave pattern at bottom of hero section */}
         <div className="absolute bottom-0 left-0 right-0 h-16 overflow-hidden">
           <svg
@@ -321,5 +328,6 @@ export default function Home() {
         </div>
       </section>
     </div>
+    </PageWrapper>
   );
 }
