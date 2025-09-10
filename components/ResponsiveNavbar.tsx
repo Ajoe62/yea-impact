@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import Logo from "./Logo";
 
 interface MobileNavProps {
   links: {
@@ -48,16 +49,9 @@ export default function ResponsiveNavbar({ links }: MobileNavProps) {
     >
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
-          {/* Logo */}
+          {/* Logo with fallback */}
           <Link href="/" className="flex items-center">
-            <Image
-              src="/images/yea_logo.png"
-              alt="YEA Foundation Logo"
-              width={140}
-              height={40}
-              className="object-contain"
-              priority
-            />
+            <Logo />
           </Link>
 
           {/* Desktop Navigation */}

@@ -26,16 +26,15 @@ export default function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return null; // Return null on the first render to avoid hydration mismatch
-  }
-
   return (
     <>
-      <ResponsiveNavbar links={navLinks} />
+      {/* Always render the navbar, but control its content visibility */}
+      <div style={{ opacity: mounted ? 1 : 0 }} className="transition-opacity duration-200">
+        <ResponsiveNavbar links={navLinks} />
+      </div>
       
       <main className="flex-1 container mx-auto px-4 py-6 md:py-10">
-        {children}
+        {mounted ? children : <div className="min-h-screen"></div>}
       </main>
       
       <footer className="bg-gray-100 pt-10 pb-6">
