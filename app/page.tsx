@@ -9,8 +9,32 @@ export default function Home() {
     <PageWrapper>
       <div className="space-y-16 md:space-y-20">
         {/* Hero Section - Mobile Optimized */}
-        <section className="relative bg-green-700 -mx-4 px-4 py-12 sm:py-16 md:py-24 text-white rounded-b-3xl">
-          <div className="container mx-auto grid md:grid-cols-2 gap-8 items-center">
+        <section className="relative bg-gradient-to-r from-green-600 to-blue-600 -mx-4 px-4 py-12 sm:py-16 md:py-24 text-white rounded-b-3xl overflow-hidden">
+          <div className="absolute inset-0 opacity-20">
+            <svg
+              className="w-full h-full"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <pattern
+                  id="grid"
+                  width="10"
+                  height="10"
+                  patternUnits="userSpaceOnUse"
+                >
+                  <path
+                    d="M 10 0 L 0 0 0 10"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="0.5"
+                  />
+                </pattern>
+              </defs>
+              <rect width="100" height="100" fill="url(#grid)" />
+            </svg>
+          </div>
+          <div className="container mx-auto grid md:grid-cols-2 gap-8 items-center relative z-10">
             <AnimatedSection animation="slideLeft" delay={0.1}>
               <div className="space-y-4 md:space-y-6 max-w-xl">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
@@ -25,13 +49,13 @@ export default function Home() {
                 <div className="flex flex-wrap gap-3 md:gap-4">
                   <Link
                     href="/programs"
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-white text-green-700 rounded-md font-semibold hover:bg-gray-100 transition shadow-sm"
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-white text-blue-600 rounded-md font-semibold hover:bg-blue-50 transition shadow-sm"
                   >
                     Our Programs
                   </Link>
                   <Link
                     href="/courses"
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-transparent border border-white rounded-md font-semibold hover:bg-white hover:text-green-700 transition"
+                    className="px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base bg-transparent border border-white rounded-md font-semibold hover:bg-white hover:text-blue-600 transition"
                   >
                     Explore Courses
                   </Link>
@@ -296,8 +320,32 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-green-700 text-white -mx-4 px-4 py-16 rounded-t-3xl text-center">
-        <div className="container mx-auto max-w-3xl space-y-6">
+      <section className="bg-gradient-to-r from-green-600 to-blue-600 text-white -mx-4 px-4 py-16 rounded-t-3xl text-center overflow-hidden relative">
+        <div className="absolute inset-0 opacity-20">
+          <svg
+            className="w-full h-full"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <pattern
+                id="grid-cta"
+                width="10"
+                height="10"
+                patternUnits="userSpaceOnUse"
+              >
+                <path
+                  d="M 10 0 L 0 0 0 10"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="0.5"
+                />
+              </pattern>
+            </defs>
+            <rect width="100" height="100" fill="url(#grid-cta)" />
+          </svg>
+        </div>
+        <div className="container mx-auto max-w-3xl space-y-6 relative z-10">
           <AnimatedSection animation="slideUp">
             <h2 className="text-3xl md:text-4xl font-bold">
               Ready to Make an Impact?
@@ -313,13 +361,13 @@ export default function Home() {
             <div className="flex flex-wrap gap-4 justify-center">
               <Link
                 href="/programs"
-                className="px-6 py-3 bg-white text-green-700 rounded-md font-semibold hover:bg-gray-100 transition"
+                className="px-6 py-3 bg-white text-blue-600 rounded-md font-semibold hover:bg-blue-50 transition shadow-md"
               >
                 Explore Programs
               </Link>
               <Link
                 href="/mentorship"
-                className="px-6 py-3 bg-transparent border border-white rounded-md font-semibold hover:bg-white hover:text-green-700 transition"
+                className="px-6 py-3 bg-transparent border border-white rounded-md font-semibold hover:bg-white hover:text-blue-600 transition"
               >
                 Become a Mentor
               </Link>

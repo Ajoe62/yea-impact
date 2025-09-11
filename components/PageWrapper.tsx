@@ -37,10 +37,10 @@ export default function PageWrapper({
 
   return (
     <div
-      className={`min-h-[calc(100vh-var(--header-height,64px)-var(--footer-height,120px))] ${className}`}
+      className={`min-h-[calc(100vh-var(--header-height,48px)-var(--footer-height,120px))] ${className}`}
       style={{
         minHeight:
-          "calc(100vh - var(--header-height,64px) - var(--footer-height,120px))",
+          "calc(100vh - var(--header-height,48px) - var(--footer-height,120px))",
       }}
     >
       {children}

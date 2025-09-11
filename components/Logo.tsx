@@ -1,8 +1,8 @@
 "use client";
 
-import React from 'react';
-import Image from 'next/image';
-import { useState } from 'react';
+import React from "react";
+import Image from "next/image";
+import { useState } from "react";
 
 interface LogoProps {
   className?: string;
@@ -17,18 +17,18 @@ export default function Logo({ className = "" }: LogoProps) {
         <Image
           src="/images/yea_logo.png"
           alt="YEA Foundation Logo"
-          width={140}
-          height={40}
+          width={120}
+          height={32}
           className="object-contain"
           priority
           onError={() => setImageError(true)}
         />
       ) : (
         <div className="flex items-center">
-          <div className="w-8 h-8 bg-green-700 rounded-full mr-2 flex items-center justify-center text-white font-bold">
+          <div className="w-7 h-7 bg-green-700 rounded-full mr-2 flex items-center justify-center text-white font-bold">
             Y
           </div>
-          <span className="text-xl font-bold text-green-700">
+          <span className="text-base font-bold text-green-700">
             YEA Foundation
           </span>
         </div>

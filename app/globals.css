@@ -12,58 +12,59 @@
   html {
     @apply scroll-smooth;
   }
-  
+
   body {
     @apply bg-gray-50 text-gray-900;
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   }
-  
+
   /* Improved heading hierarchy with responsive sizes */
   h1 {
     @apply text-3xl sm:text-4xl md:text-5xl font-bold;
   }
-  
+
   h2 {
     @apply text-2xl sm:text-3xl md:text-4xl font-bold;
   }
-  
+
   h3 {
     @apply text-xl sm:text-2xl font-bold;
   }
-  
+
   h4 {
     @apply text-lg sm:text-xl font-semibold;
   }
-  
+
   /* Improve focus styles for accessibility */
   :focus-visible {
     @apply outline-2 outline-green-500 outline-offset-2 rounded-sm;
   }
-  
+
   /* Custom scrollbar for desktop */
   @media (min-width: 768px) {
     ::-webkit-scrollbar {
       width: 10px;
       height: 10px;
     }
-    
+
     ::-webkit-scrollbar-track {
       @apply bg-gray-100;
     }
-    
+
     ::-webkit-scrollbar-thumb {
       @apply bg-gray-300 rounded-full;
     }
-    
+
     ::-webkit-scrollbar-thumb:hover {
       @apply bg-gray-400;
     }
   }
-  
+
   /* Variables for dynamic viewport heights */
   :root {
     --vh: 1vh;
-    --header-height: 64px;
+    --header-height: 48px;
     --footer-height: 120px;
   }
 }
@@ -75,30 +76,30 @@
     @apply inline-flex items-center justify-center px-4 py-2 rounded font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors;
     min-height: 2.75rem; /* Ensures good touch target size */
   }
-  
+
   .btn-primary {
     @apply bg-green-600 text-white hover:bg-green-700 focus:ring-green-500;
   }
-  
+
   .btn-secondary {
     @apply bg-white text-green-700 border border-green-200 hover:bg-green-50 focus:ring-green-300;
   }
-  
+
   /* Card styles with responsive padding */
   .card {
     @apply bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden p-4 sm:p-6;
   }
-  
+
   /* Form elements with consistent sizing */
   .form-input {
     @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500;
     min-height: 2.75rem; /* Ensures good touch target size */
   }
-  
+
   /* Hide scrollbars but keep functionality */
   .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
   }
   .no-scrollbar::-webkit-scrollbar {
     display: none; /* Chrome, Safari and Opera */
@@ -112,35 +113,37 @@
     height: 100vh; /* Fallback */
     height: calc(var(--vh, 1vh) * 100);
   }
-  
+
   /* For setting max height with consideration of header/footer */
   .max-h-content {
     max-height: calc(100vh - var(--header-height) - var(--footer-height));
-    max-height: calc(calc(var(--vh, 1vh) * 100) - var(--header-height) - var(--footer-height));
+    max-height: calc(
+      calc(var(--vh, 1vh) * 100) - var(--header-height) - var(--footer-height)
+    );
   }
-  
+
   /* For sticky positioning that accounts for header */
   .top-header {
     top: var(--header-height);
   }
-  
+
   /* Better touch targets for mobile */
   .touch-target {
     @apply p-2;
     min-height: 44px;
     min-width: 44px;
   }
-  
+
   /* Responsive text sizes */
   .text-responsive {
     @apply text-base sm:text-lg md:text-xl;
   }
-  
+
   /* Responsive padding */
   .p-responsive {
     @apply p-4 sm:p-6 md:p-8;
   }
-  
+
   /* Responsive margin */
   .m-responsive {
     @apply m-4 sm:m-6 md:m-8;

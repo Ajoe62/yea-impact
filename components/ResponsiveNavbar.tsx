@@ -46,8 +46,9 @@ export default function ResponsiveNavbar({ links }: MobileNavProps) {
       className={`sticky top-0 z-50 w-full transition-all duration-200 ${
         scrolled ? "bg-white shadow-md" : "bg-white/95"
       }`}
+      style={{ "--header-height": "48px" } as React.CSSProperties}
     >
-      <div className="container mx-auto px-4 py-3">
+      <div className="container mx-auto px-4 py-1.5">
         <div className="flex items-center justify-between">
           {/* Logo with fallback */}
           <Link href="/" className="flex items-center">
@@ -55,12 +56,12 @@ export default function ResponsiveNavbar({ links }: MobileNavProps) {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-6">
+          <nav className="hidden md:flex space-x-5">
             {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-gray-700 hover:text-green-700 transition-colors font-medium"
+                className="text-gray-700 hover:text-green-700 transition-colors font-medium text-sm"
               >
                 {link.label}
               </Link>
@@ -75,6 +76,7 @@ export default function ResponsiveNavbar({ links }: MobileNavProps) {
               setIsOpen(!isOpen);
             }}
             aria-label="Toggle menu"
+            style={{ padding: '4px' }}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -104,13 +106,13 @@ export default function ResponsiveNavbar({ links }: MobileNavProps) {
 
         {/* Mobile Menu */}
         {isOpen && (
-          <div className="md:hidden absolute left-0 right-0 top-full bg-white shadow-lg rounded-b-lg py-2 px-4 border-t border-gray-100 z-50">
-            <nav className="flex flex-col space-y-3 py-3">
+          <div className="md:hidden absolute left-0 right-0 top-full bg-white shadow-lg rounded-b-lg py-1 px-4 border-t border-gray-100 z-50 mt-0.5">
+            <nav className="flex flex-col space-y-2 py-2">
               {links.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-gray-700 hover:text-green-700 transition-colors py-2 px-3 rounded-md hover:bg-gray-50"
+                  className="text-gray-700 hover:text-green-700 transition-colors py-1.5 px-3 rounded-md hover:bg-gray-50 text-sm"
                   onClick={() => setIsOpen(false)}
                 >
                   {link.label}
