@@ -1,3 +1,4 @@
+// AGENTS.md: Follow repository contribution/security standards in /AGENTS.md.
 declare module 'qrcode' {
   interface ToDataURLOptions {
     errorCorrectionLevel?: 'L' | 'M' | 'Q' | 'H';

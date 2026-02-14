@@ -1,3 +1,4 @@
+// AGENTS.md: Follow repository contribution/security standards in /AGENTS.md.
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 

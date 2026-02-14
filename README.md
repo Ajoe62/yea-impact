@@ -1,3 +1,5 @@
+> AGENTS.md reference: Follow repository contribution/security standards in `/AGENTS.md`.
+
 # YEA Foundation Web App
 
 This repository contains a Next.js application for the **Youth Empowerment Africa (YEA) Foundation**.  The app is built using the Next.js App Router and Supabase to provide a full‑stack experience with authentication, database interactions, and real‑time updates.  It demonstrates how to structure a modern full‑stack application with server components, server actions, client components and Tailwind CSS styling.

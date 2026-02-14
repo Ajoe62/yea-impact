@@ -1,3 +1,4 @@
+// AGENTS.md: Follow repository contribution/security standards in /AGENTS.md.
 import { notFound } from "next/navigation";
 import { createServer } from "@/utils/supabase/server";
 import RegistrationForm from "./register-form";
