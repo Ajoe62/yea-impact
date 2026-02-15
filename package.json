@@ -1,4 +1,5 @@
 {
+  "agentGuide": "See AGENTS.md for repository contribution/security standards.",
   "name": "yea",
   "version": "0.1.0",
   "private": true,

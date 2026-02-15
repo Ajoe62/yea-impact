@@ -1,3 +1,4 @@
+// AGENTS.md: Follow repository contribution/security standards in /AGENTS.md.
 "use client";
 
 import { ReactNode, useState } from 'react';

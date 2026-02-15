@@ -1,3 +1,4 @@
+// AGENTS.md: Follow repository contribution/security standards in /AGENTS.md.
 import { createBrowserClient } from '@supabase/ssr';
 
 /**

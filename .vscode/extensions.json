@@ -1,4 +1,5 @@
 {
+  "agentGuide": "See AGENTS.md for repository contribution/security standards.",
   "recommendations": [
     "bradlc.vscode-tailwindcss",
     "csstools.postcss",

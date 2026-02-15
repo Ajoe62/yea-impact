@@ -1,3 +1,4 @@
+// AGENTS.md: Follow repository contribution/security standards in /AGENTS.md.
 // types/css-modules.d.ts
 declare module "*.module.css" {
   const classes: { [key: string]: string };

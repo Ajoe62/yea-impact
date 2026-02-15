@@ -1,3 +1,5 @@
+AGENTS.md reference: Follow repository contribution/security standards in /AGENTS.md.
+
 This is a placeholder file. 
 
 Please place your image files in this directory:
