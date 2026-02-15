@@ -3,8 +3,8 @@ import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 interface CheckinPageProps {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ token?: string }>; // Changed to Promise
+  params: { id: string };
+  searchParams: { token?: string };
 }
 
 /**
@@ -14,23 +14,18 @@ interface CheckinPageProps {
  * scanning the QR code at the event.
  */
 export default async function EventCheckinPage({ params, searchParams }: CheckinPageProps) {
-  const { id } = await params;
-  const { token } = await searchParams; // Changed to await searchParams
-  
+  const token = searchParams.token;
   if (!token) {
     return notFound();
   }
-
-  const supabase = createServer();
-
+  const supabase = await createServer();
   // Validate the registration
   const { data: registration, error } = await supabase
     .from('event_registrations')
     .select('id, checked_in')
-    .eq('event_id', id)
+    .eq('event_id', params.id)
     .eq('token', token)
     .single();
-
   if (!registration || error) {
     return (
       <div className="p-8 text-center">
@@ -39,7 +34,6 @@ export default async function EventCheckinPage({ params, searchParams }: Checkin
       </div>
     );
   }
-
   // If not yet checked in, mark as checked in
   if (!registration.checked_in) {
     await supabase
@@ -47,7 +41,6 @@ export default async function EventCheckinPage({ params, searchParams }: Checkin
       .update({ checked_in: true })
       .eq('id', registration.id);
   }
-
   return (
     <div className="p-8 text-center">
       <h1 className="mb-4 text-2xl font-bold text-green-700">Check‑in successful</h1>

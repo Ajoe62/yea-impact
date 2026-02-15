@@ -1,59 +1,46 @@
-"use client";
-
 import { useState, useEffect } from "react";
 
-interface ScrollInfo {
-  scrollY: number;
-  direction: "up" | "down" | null;
-  scrolling: boolean;
-}
-
-export default function useScroll(): ScrollInfo {
-  const [scrollInfo, setScrollInfo] = useState<ScrollInfo>({
-    scrollY: 0,
-    direction: null,
-    scrolling: false,
-  });
+export default function useScroll() {
+  const [scrolling, setScrolling] = useState(false);
+  const [direction, setDirection] = useState<"up" | "down">("down");
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
-    let lastScrollY = window.scrollY;
-    let ticking = false;
-    let scrollTimeout: NodeJS.Timeout;
+    let timeoutId: NodeJS.Timeout;
 
-    const updateScrollInfo = () => {
-      const scrollY = window.scrollY;
-      const direction = scrollY > lastScrollY ? "down" : "up";
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
 
-      setScrollInfo({
-        scrollY,
-        direction,
-        scrolling: true,
-      });
+      // Determine scroll direction
+      if (currentScrollY > lastScrollY) {
+        setDirection("down");
+      } else if (currentScrollY < lastScrollY) {
+        setDirection("up");
+      }
 
-      lastScrollY = scrollY;
-      ticking = false;
+      setLastScrollY(currentScrollY);
+      setScrolling(true);
 
-      // Reset scrolling state after scrolling stops
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => {
-        setScrollInfo((prev) => ({ ...prev, scrolling: false }));
+      // Clear existing timeout
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      // Set scrolling to false after user stops scrolling
+      timeoutId = setTimeout(() => {
+        setScrolling(false);
       }, 150);
     };
 
-    const onScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(updateScrollInfo);
-        ticking = true;
-      }
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      clearTimeout(scrollTimeout);
+      window.removeEventListener("scroll", handleScroll);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     };
-  }, []);
+  }, [lastScrollY]);
 
-  return scrollInfo;
+  return { scrolling, direction };
 }

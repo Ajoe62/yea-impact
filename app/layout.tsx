@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import ResponsiveNavbar from "@/components/ResponsiveNavbar";
 import Link from "next/link";
 import Image from "next/image";
+import { createServer } from "@/utils/supabase/server";
 
 export const metadata: Metadata = {
   title: "YEA Foundation",
@@ -18,26 +19,34 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-// Navigation links for the app - defined at root level for consistency
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/programs", label: "Programs" },
-  { href: "/courses", label: "Courses" },
-  { href: "/mentorship", label: "Mentorship" },
-  { href: "/events", label: "Events" },
-  { href: "/jobs", label: "Jobs" },
-  { href: "/login", label: "Login" },
-];
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const supabase = await createServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Dynamic navigation links based on authentication status
+  const navLinks = [
+    { href: "/", label: "Home" },
+    { href: "/programs", label: "Programs" },
+    { href: "/courses", label: "Courses" },
+    { href: "/mentorship", label: "Mentorship" },
+    { href: "/events", label: "Events" },
+    { href: "/jobs", label: "Jobs" },
+    {
+      href: user ? "/dashboard" : "/login",
+      label: user ? "Dashboard" : "Login",
+    },
+  ];
+
   return (
     <html lang="en" className="scroll-smooth">
       <body className="min-h-screen flex flex-col">
-        <ResponsiveNavbar links={navLinks} />
+        <ResponsiveNavbar links={navLinks} userEmail={user?.email} />
         <main className="flex-1 container mx-auto px-4 py-4 md:py-8">
           {children}
         </main>
@@ -46,7 +55,7 @@ export default function RootLayout({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
               {/* About */}
               <div>
-                <h3 className="text-green-700 font-bold text-lg mb-3">
+                <h3 className="text-blue-700 font-bold text-lg mb-3">
                   About YEA
                 </h3>
                 <p className="text-gray-600 text-sm">
@@ -58,7 +67,7 @@ export default function RootLayout({
 
               {/* Quick Links */}
               <div>
-                <h3 className="text-green-700 font-bold text-lg mb-3">
+                <h3 className="text-blue-700 font-bold text-lg mb-3">
                   Quick Links
                 </h3>
                 <ul className="space-y-2 text-sm">

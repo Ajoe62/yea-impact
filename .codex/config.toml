@@ -1,0 +1,12 @@
+# Project-scoped Codex defaults (loaded when project is trusted).
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+model = "gpt-5.2"
+
+[sandbox_workspace_write]
+network_access = false
+
+[features]
+shell_snapshot = true
+web_search_request = true
