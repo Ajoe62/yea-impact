@@ -1,3 +1,4 @@
+// AGENTS.md: Follow repository contribution/security standards in /AGENTS.md.
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import ResponsiveNavbar from "@/components/ResponsiveNavbar";

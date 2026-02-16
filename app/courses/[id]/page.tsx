@@ -1,21 +1,23 @@
-import { notFound } from 'next/navigation';
-import { createServer } from '@/utils/supabase/server';
-import EnrollmentForm from './enroll-form';
 
+// AGENTS.md: Follow repository contribution/security standards in /AGENTS.md.
+import { notFound } from "next/navigation";
+import { createServer } from "@/utils/supabase/server";
+import EnrollmentForm from "./enroll-form";
 interface CoursePageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 /**
  * Course detail page. Fetches a single course and its modules from Supabase.
  */
 export default async function CourseDetailPage({ params }: CoursePageProps) {
+  const { id } = await params;
   const supabase = await createServer();
   // Fetch the course by ID
   const { data: course } = await supabase
     .from('courses')
     .select('id, name, description, difficulty, start_date')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   if (!course) {
@@ -26,7 +28,7 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
   const { data: modules } = await supabase
     .from('course_modules')
     .select('id, module_number, title, content_url')
-    .eq('course_id', params.id)
+    .eq('course_id', id)
     .order('module_number', { ascending: true });
 
   return (

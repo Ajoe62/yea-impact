@@ -1,3 +1,9 @@
+/* AGENTS.md: Follow repository contribution/security standards in /AGENTS.md. */
+/* 
+  This CSS file uses Tailwind CSS directives.
+  The @tailwind and @apply directives are processed by the Tailwind CSS compiler.
+  Editor errors about unknown rules can be safely ignored or disabled with the .vscode/settings.json file.
+*/
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

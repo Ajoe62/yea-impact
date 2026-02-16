@@ -1,3 +1,4 @@
+// AGENTS.md: Follow repository contribution/security standards in /AGENTS.md.
 "use server";
 
 import { createServer } from "@/utils/supabase/server";

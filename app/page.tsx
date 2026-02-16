@@ -1,3 +1,4 @@
+// AGENTS.md: Follow repository contribution/security standards in /AGENTS.md.
 import Link from "next/link";
 import HeroSlider from "@/components/HeroSlider";
 import AnimatedSection from "@/components/AnimatedSection";

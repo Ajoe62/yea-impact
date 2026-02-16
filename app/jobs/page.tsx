@@ -1,4 +1,9 @@
-import { createServer } from '@/utils/supabase/server';
+// AGENTS.md: Follow repository contribution/security standards in /AGENTS.md.
+import { createServer } from "@/utils/supabase/server";
+import Link from "next/link";
+import Image from "next/image";
+import AnimatedSection from "@/components/AnimatedSection";
+import PageWrapper from "@/components/PageWrapper";
 
 export default async function JobsPage() {
   const supabase = await createServer();
