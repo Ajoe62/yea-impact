@@ -2,14 +2,27 @@
 "use server";
 
 import { createServer } from "@/utils/supabase/server";
+import { getBaseUrl } from "@/utils/auth/get-base-url";
+import {
+  mapLoginErrorMessage,
+  mapOAuthStartErrorMessage,
+  mapSignupErrorMessage,
+  toAuthErrorDetails,
+} from "@/utils/auth/error-mapping";
 import { redirect } from "next/navigation";
-
-const NETWORK_ERROR_MESSAGE =
-  "Unable to reach authentication service. Check your internet/VPN/proxy settings and try again.";
 
 interface AuthActionResult {
   error?: string;
   success?: string;
+}
+
+function isNextRedirectError(error: unknown): boolean {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const maybeDigest = (error as { digest?: string }).digest;
+  return typeof maybeDigest === "string" && maybeDigest.startsWith("NEXT_REDIRECT");
 }
 
 function normalizeEmail(value: FormDataEntryValue | null): string {
@@ -36,30 +49,10 @@ function validateAuthInput(email: string, password: string): string | null {
   return null;
 }
 
-function isNetworkError(error: unknown): boolean {
-  if (!(error instanceof Error)) {
-    return false;
-  }
-
-  const message = error.message.toLowerCase();
-  if (message.includes("fetch failed")) {
-    return true;
-  }
-
-  const cause = (error as Error & { cause?: { code?: string; reason?: string } }).cause;
-  const causeCode = cause?.code ?? "";
-  const causeReason = (cause?.reason ?? "").toLowerCase();
-
-  return (
-    causeCode === "ERR_SSL_SSLV3_ALERT_ILLEGAL_PARAMETER" ||
-    causeReason.includes("sslv3 alert illegal parameter")
-  );
-}
 
 async function signInAfterSignup(email: string, password: string): Promise<AuthActionResult> {
-  const supabase = await createServer();
-
   try {
+    const supabase = await createServer();
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
@@ -70,7 +63,7 @@ async function signInAfterSignup(email: string, password: string): Promise<AuthA
         };
       }
 
-      return { error: error.message };
+      return { error: mapLoginErrorMessage(toAuthErrorDetails(error)) };
     }
 
     if (!data.session) {
@@ -79,11 +72,15 @@ async function signInAfterSignup(email: string, password: string): Promise<AuthA
       };
     }
   } catch (error) {
-    if (isNetworkError(error)) {
+    const message = mapLoginErrorMessage(toAuthErrorDetails(error));
+    if (message !== "Unable to sign in right now. Please try again.") {
       return { success: "Account created. Please sign in once network access is stable." };
     }
 
-    throw error;
+    return {
+      success:
+        "Account created. Please confirm your email and sign in from the login page.",
+    };
   }
 
   redirect("/dashboard");
@@ -102,19 +99,18 @@ export async function login(formData: FormData): Promise<AuthActionResult | void
     return { error: validationError };
   }
 
-  const supabase = await createServer();
-
   try {
+    const supabase = await createServer();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      return { error: error.message };
+      return { error: mapLoginErrorMessage(toAuthErrorDetails(error)) };
     }
   } catch (error) {
-    if (isNetworkError(error)) {
-      return { error: NETWORK_ERROR_MESSAGE };
+    if (isNextRedirectError(error)) {
+      throw error;
     }
 
-    return { error: "Unexpected authentication error. Please try again." };
+    return { error: mapLoginErrorMessage(toAuthErrorDetails(error)) };
   }
 
   redirect("/dashboard");
@@ -133,12 +129,17 @@ export async function signup(formData: FormData): Promise<AuthActionResult | voi
     return { error: validationError };
   }
 
-  const supabase = await createServer();
-
   try {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const supabase = await createServer();
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${getBaseUrl()}/auth/confirm`,
+      },
+    });
     if (error) {
-      return { error: error.message };
+      return { error: mapSignupErrorMessage(toAuthErrorDetails(error)) };
     }
 
     if (!data.session) {
@@ -148,12 +149,44 @@ export async function signup(formData: FormData): Promise<AuthActionResult | voi
       };
     }
   } catch (error) {
-    if (isNetworkError(error)) {
-      return { error: NETWORK_ERROR_MESSAGE };
+    if (isNextRedirectError(error)) {
+      throw error;
     }
 
-    return { error: "Unable to create account right now. Please try again." };
+    return { error: mapSignupErrorMessage(toAuthErrorDetails(error)) };
   }
 
   return signInAfterSignup(email, password);
+}
+
+export async function signInWithGoogle(): Promise<AuthActionResult | void> {
+  try {
+    const supabase = await createServer();
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${getBaseUrl()}/auth/callback?next=/dashboard`,
+        queryParams: {
+          access_type: "offline",
+          prompt: "select_account",
+        },
+      },
+    });
+
+    if (error) {
+      return { error: mapOAuthStartErrorMessage(toAuthErrorDetails(error)) };
+    }
+
+    if (!data.url) {
+      return { error: "Unable to start Google sign-in right now. Please try again." };
+    }
+
+    redirect(data.url);
+  } catch (error) {
+    if (isNextRedirectError(error)) {
+      throw error;
+    }
+
+    return { error: mapOAuthStartErrorMessage(toAuthErrorDetails(error)) };
+  }
 }

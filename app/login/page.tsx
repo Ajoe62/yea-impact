@@ -2,8 +2,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { login, signup } from "./actions";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { login, signInWithGoogle, signup } from "./actions";
 
 interface AuthResult {
   error?: string;
@@ -17,12 +18,21 @@ interface AuthResult {
  * to either sign in or create a new account.
  */
 export default function LoginPage() {
+  const searchParams = useSearchParams();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
+
+  useEffect(() => {
+    const authError = searchParams.get("authError");
+    if (authError === "google_callback_failed") {
+      setError("Google sign-in failed. Please try again or sign in with email and password.");
+    }
+  }, [searchParams]);
 
   function switchMode(nextIsSignUp: boolean) {
     setIsSignUp(nextIsSignUp);
@@ -53,11 +63,31 @@ export default function LoginPage() {
       } else if (result?.success) {
         setSuccess(result.success);
       }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Unexpected error.";
-      setError(message);
+    } catch {
+      setError("Unable to process your request right now. Please try again.");
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    if (isSubmitting || isGoogleSubmitting) {
+      return;
+    }
+
+    setError(null);
+    setSuccess(null);
+    setIsGoogleSubmitting(true);
+
+    try {
+      const result: AuthResult | void = await signInWithGoogle();
+      if (result?.error) {
+        setError(result.error);
+      }
+    } catch {
+      setError("Unable to process your request right now. Please try again.");
+    } finally {
+      setIsGoogleSubmitting(false);
     }
   }
 
@@ -115,10 +145,25 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isGoogleSubmitting}
             className="w-full rounded-md bg-blue-600 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmitting ? "Please wait..." : isSignUp ? "Sign Up" : "Sign In"}
+          </button>
+
+          <div className="flex items-center gap-3 py-1">
+            <span className="h-px flex-1 bg-gray-200" />
+            <span className="text-xs uppercase tracking-wide text-gray-500">or</span>
+            <span className="h-px flex-1 bg-gray-200" />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={isSubmitting || isGoogleSubmitting}
+            className="w-full rounded-md border border-gray-300 bg-white py-2 text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isGoogleSubmitting ? "Redirecting..." : "Continue with Google"}
           </button>
         </form>
 

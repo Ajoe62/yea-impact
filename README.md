@@ -11,7 +11,7 @@ This repository contains a Next.js application for the **Youth Empowerment Afric
 - **Mentorship** – directory of mentors.  Users can view mentor details and submit mentorship requests.  Requests are stored in `mentor_requests` with a unique constraint on `(mentee_id, mentor_id)` and are protected by Row Level Security【742530328472577†L266-L344】.
 - **Events** – list of upcoming events.  Users can view event details, register for an event, and receive a QR code for check‑in.  Registrations are stored in `event_registrations` with a unique constraint on `(user_id, event_id)`; a token is generated and stored to verify attendance.
 - **Jobs** – list of industry opportunities.  Users can view job details and apply.  Applications are stored in `applications` with a unique constraint on `(job_id, applicant_id)` to prevent duplicates.
-- **Authentication** – simple sign‑in/sign‑up form using Supabase Auth.  Server actions encapsulate the sign‑in and sign‑up logic and redirect upon success【636462617872161†L195-L221】.
+- **Authentication** – email/password auth plus Google OAuth using Supabase Auth. Server actions encapsulate sign‑in/sign‑up/OAuth logic and redirect upon success.
 - **Reusable server actions** – server actions are used for enrolment, registration, mentorship requests and job applications.  They handle auth checks, enforce unique constraints and return friendly error messages.
 
 ## Getting Started
@@ -48,7 +48,8 @@ This repository contains a Next.js application for the **Youth Empowerment Afric
    - `NEXT_PUBLIC_SUPABASE_URL` – your Supabase project URL.
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` – your Supabase anon/public key.
    - `SUPABASE_SERVICE_ROLE_KEY` – (optional) service role key used only on the server.
-   - `NEXT_PUBLIC_BASE_URL` – the base URL of your deployed app (e.g. `https://your-app.vercel.app`).  Used for generating QR codes.
+- `NEXT_PUBLIC_BASE_URL` – the base URL of your deployed app (e.g. `https://your-app.vercel.app`). Used for auth email redirects and generating QR/check-in links.
+  - Add `${NEXT_PUBLIC_BASE_URL}/auth/callback` to Supabase Auth allowed redirect URLs for Google sign-in.
 
 4. **Set up the database**
 

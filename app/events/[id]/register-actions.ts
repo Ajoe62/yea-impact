@@ -2,7 +2,6 @@
 "use server";
 
 import { createServer } from "@/utils/supabase/server";
-import { createClient } from "@/utils/supabase/client";
 
 /**
  * Server action to register the authenticated user for an event.  Generates

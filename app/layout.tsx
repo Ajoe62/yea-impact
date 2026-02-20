@@ -26,9 +26,17 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user: { email?: string | null } | null = null;
+
+  try {
+    const {
+      data: { user: currentUser },
+    } = await supabase.auth.getUser();
+    user = currentUser;
+  } catch {
+    // Avoid app-wide rendering failures when auth endpoints are temporarily unreachable.
+    user = null;
+  }
 
   // Dynamic navigation links based on authentication status
   const navLinks = [

@@ -2,12 +2,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { requestPasswordReset } from "./actions";
 
 interface ForgotPasswordResult {
   error?: string;
   success?: string;
+  retryAfterSeconds?: number;
 }
 
 export default function ForgotPasswordPage() {
@@ -15,6 +16,19 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
+
+  useEffect(() => {
+    if (cooldownSeconds <= 0) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setCooldownSeconds((current) => Math.max(0, current - 1));
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [cooldownSeconds]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -35,10 +49,14 @@ export default function ForgotPasswordPage() {
       } else if (result.success) {
         setSuccess(result.success);
         setEmail("");
+        if (result.retryAfterSeconds && result.retryAfterSeconds > 0) {
+          setCooldownSeconds(result.retryAfterSeconds);
+        } else {
+          setCooldownSeconds(60);
+        }
       }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Unexpected error.";
-      setError(message);
+    } catch {
+      setError("Unable to process your request right now. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -75,10 +93,14 @@ export default function ForgotPasswordPage() {
 
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || cooldownSeconds > 0}
             className="w-full rounded-md bg-blue-600 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? "Please wait..." : "Send reset link"}
+            {isSubmitting
+              ? "Please wait..."
+              : cooldownSeconds > 0
+              ? `Try again in ${cooldownSeconds}s`
+              : "Send reset link"}
           </button>
         </form>
 

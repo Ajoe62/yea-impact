@@ -2,12 +2,18 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
+import {
+  mapResetLinkVerificationErrorMessage,
+  mapResetPasswordUpdateErrorMessage,
+  toAuthErrorDetails,
+} from "@/utils/auth/error-mapping";
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [supabase] = useState(() => createClient());
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -36,7 +42,7 @@ export default function ResetPasswordPage() {
         }
 
         if (verifyError) {
-          setError("This reset link is invalid or expired. Request a new one.");
+          setError(mapResetLinkVerificationErrorMessage(toAuthErrorDetails(verifyError)));
           setIsReady(false);
           setIsVerifying(false);
           return;
@@ -44,6 +50,7 @@ export default function ResetPasswordPage() {
 
         setIsReady(true);
         setIsVerifying(false);
+        router.replace("/reset-password");
         return;
       }
 
@@ -82,7 +89,7 @@ export default function ResetPasswordPage() {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [searchParams, supabase]);
+  }, [router, searchParams, supabase]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -110,7 +117,7 @@ export default function ResetPasswordPage() {
     });
 
     if (updateError) {
-      setError(updateError.message);
+      setError(mapResetPasswordUpdateErrorMessage(toAuthErrorDetails(updateError)));
       setIsSubmitting(false);
       return;
     }
