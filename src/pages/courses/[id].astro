@@ -1,0 +1,92 @@
+---
+import { actions, isInputError } from 'astro:actions';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import Notice from '../../components/Notice.astro';
+import { formatDate } from '../../lib/format';
+
+const { id } = Astro.params;
+const { supabase, user } = Astro.locals;
+if (!supabase || !id) return Astro.rewrite('/404');
+
+const { data: course } = await supabase
+  .from('courses')
+  .select('id, name, description, difficulty, start_date')
+  .eq('id', id)
+  .single();
+if (!course) return Astro.rewrite('/404');
+
+const { data: modules } = await supabase
+  .from('course_modules')
+  .select('id, module_number, title, content_url')
+  .eq('course_id', id)
+  .order('module_number', { ascending: true });
+
+const result = Astro.getActionResult(actions.enrollInCourse);
+const error = result?.error && (isInputError(result.error) ? 'Something went wrong. Please try again.' : result.error.message);
+---
+
+<BaseLayout title={course.name} description={course.description ?? undefined}>
+  <PageHero media="courses-hero" alt="" eyebrow="Course" title={course.name} compact>
+    <p class="text-sm text-white/75">
+      {course.difficulty && <>Difficulty: {course.difficulty} · </>}Starts {formatDate(course.start_date)}
+    </p>
+  </PageHero>
+
+  <div class="container-page grid gap-10 py-12 lg:grid-cols-[1fr_22rem] lg:py-16">
+    <div class="space-y-10">
+      {course.description && <p class="text-lg leading-relaxed text-ink/75">{course.description}</p>}
+
+      <section class="space-y-4">
+        <h2 class="text-2xl font-bold text-brand-900">Modules</h2>
+        {
+          modules && modules.length > 0 ? (
+            <ol class="space-y-3">
+              {modules.map((m) => (
+                <li class="card flex items-center gap-4 p-4">
+                  <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-100 font-display font-bold text-brand-800">
+                    {m.module_number}
+                  </span>
+                  <div class="flex-1">
+                    <h3 class="font-semibold text-brand-900">{m.title}</h3>
+                  </div>
+                  {m.content_url && (
+                    <a href={m.content_url} target="_blank" rel="noopener noreferrer" class="text-sm font-semibold text-brand-700 hover:underline">
+                      View content ↗
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p class="text-ink/60">No modules yet.</p>
+          )
+        }
+      </section>
+    </div>
+
+    <aside class="lg:sticky lg:top-24 lg:self-start">
+      <div class="card space-y-4 p-6">
+        <h2 class="text-lg font-bold text-brand-900">Enrol</h2>
+        {
+          result?.data ? (
+            <Notice tone="success">You are enrolled in this course!</Notice>
+          ) : user ? (
+            <form method="POST" action={actions.enrollInCourse} class="space-y-3">
+              <input type="hidden" name="courseId" value={course.id} />
+              {error && <Notice tone="error">{error}</Notice>}
+              <button class="btn-primary w-full">Enrol in this course</button>
+            </form>
+          ) : (
+            <>
+              <p class="text-sm text-ink/70">Sign in to enrol in this course.</p>
+              <a href={`/login?next=${encodeURIComponent(Astro.url.pathname)}`} class="btn-primary w-full">
+                Sign in to enrol
+              </a>
+            </>
+          )
+        }
+      </div>
+    </aside>
+  </div>
+</BaseLayout>

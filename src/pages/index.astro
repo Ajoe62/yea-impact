@@ -1,0 +1,193 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MediaImage from '../components/media/MediaImage.astro';
+import MediaVideo from '../components/media/MediaVideo.astro';
+import HeroSlideshow from '../components/HeroSlideshow.astro';
+import ImageMarquee from '../components/ImageMarquee.astro';
+import { findVideoSequence, heroImages, type ImageSlot } from '../lib/media';
+import subscribeClip from '../assets/videos/yea-subscribe.mp4?url';
+
+// The home page has no database content, so it is built once as static HTML.
+export const prerender = true;
+
+// Stand-in until clips named home-hero-1.mp4, home-hero-2.mp4 … are added.
+const heroClips = findVideoSequence('home-hero');
+const clips = heroClips.length > 0 ? heroClips : [subscribeClip];
+
+const stats = [
+  { value: '20M', label: 'Youths we aim to reach across Africa' },
+  { value: '12–40', label: 'Ages we work with' },
+  { value: '7', label: 'Core areas of impact' },
+];
+
+const offerings: { slot: ImageSlot; title: string; text: string; href: string; cta: string }[] = [
+  {
+    slot: 'home-courses',
+    title: 'Digital skills courses',
+    text: 'Learn in-demand tech skills through structured, module-by-module courses.',
+    href: '/courses',
+    cta: 'Browse courses',
+  },
+  {
+    slot: 'home-mentorship',
+    title: 'Mentorship & coaching',
+    text: 'Get guidance from experienced mentors who have walked the path before you.',
+    href: '/mentorship',
+    cta: 'Find a mentor',
+  },
+  {
+    slot: 'home-events',
+    title: 'Events',
+    text: 'Register for workshops and gatherings, and check in with your personal QR code.',
+    href: '/events',
+    cta: 'See upcoming events',
+  },
+  {
+    slot: 'home-jobs',
+    title: 'Industry opportunities',
+    text: 'Apply for jobs and placements with partners who are hiring young talent.',
+    href: '/jobs',
+    cta: 'View opportunities',
+  },
+];
+
+const gallery: { slot: ImageSlot; className: string }[] = [
+  { slot: 'home-gallery-1', className: 'col-span-2 row-span-2' },
+  { slot: 'home-gallery-2', className: '' },
+  { slot: 'home-gallery-3', className: '' },
+  { slot: 'home-gallery-4', className: '' },
+  { slot: 'home-gallery-5', className: '' },
+  { slot: 'home-gallery-6', className: 'col-span-2 md:col-span-4' },
+];
+---
+
+<BaseLayout>
+  <!-- Hero -->
+  <HeroSlideshow
+    clips={clips}
+    images={heroImages}
+    eyebrow="Dynamic Youth Empowerment & Advocacy"
+    headline="Unlocking the <em>potential</em> of Africa’s youth."
+    lead="Through advocacy, mindset reorientation and skills development, we help young Africans build a better future for themselves and their communities."
+    buttons={[
+      { label: 'Explore our programs', href: '/programs' },
+      { label: 'Find a mentor', href: '/mentorship' },
+    ]}
+  >
+    <dl class="mt-10 grid max-w-3xl grid-cols-3 gap-4 border-t border-white/20 pt-6">
+      {
+        stats.map((s) => (
+          <div class="flex flex-col-reverse justify-end gap-1">
+            <dt class="text-xs text-white/70 sm:text-sm">{s.label}</dt>
+            <dd class="font-display text-3xl font-bold text-sun-300 sm:text-4xl">{s.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </HeroSlideshow>
+
+  <!-- Scrolling photo strip -->
+  <ImageMarquee label="Photos from YEA programmes" alt="YEA community moment" class="bg-brand-950 py-10 md:py-14" />
+
+  <!-- Mission -->
+  <section class="container-page grid items-center gap-12 py-20 md:grid-cols-2 lg:gap-20 lg:py-28">
+    <div class="aspect-4/5 overflow-hidden rounded-3xl shadow-xl shadow-brand-900/10">
+      <MediaImage media="home-mission" alt="Youths learning together" sizes="(min-width: 768px) 50vw, 100vw" />
+    </div>
+    <div class="space-y-5">
+      <p class="eyebrow">Our mission</p>
+      <h2 class="text-3xl font-bold text-brand-900 md:text-4xl">Engaged youths build thriving societies.</h2>
+      <p class="text-lg leading-relaxed text-ink/75">
+        Dynamic Youth Empowerment &amp; Advocacy (YEA) is a non-governmental organisation dedicated to empowering African youths between
+        the ages of 12 and 40. We believe that many of our societies suffer from social decadence because youths are
+        under-engaged and exposed to harmful content.
+      </p>
+      <p class="leading-relaxed text-ink/75">
+        Through advocacy, mindset reorientation and skills development, we aim to impact 20 million youths across
+        Africa.
+      </p>
+      <a href="/programs" class="btn-primary mt-2">Our areas of impact</a>
+    </div>
+  </section>
+
+  <!-- What we offer -->
+  <section class="bg-brand-50/60 py-20 lg:py-28">
+    <div class="container-page space-y-12">
+      <div class="max-w-2xl space-y-3">
+        <p class="eyebrow">What we offer</p>
+        <h2 class="text-3xl font-bold text-brand-900 md:text-4xl">Everything you need to grow, in one place.</h2>
+      </div>
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {
+          offerings.map((o) => (
+            <a href={o.href} class="card group flex flex-col overflow-hidden transition hover:-translate-y-1 hover:shadow-lg">
+              <div class="aspect-4/3 overflow-hidden">
+                <MediaImage
+                  media={o.slot}
+                  alt=""
+                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                  widths={[400, 800, 1200]}
+                  class="transition duration-500 group-hover:scale-105"
+                />
+              </div>
+              <div class="flex flex-1 flex-col gap-2 p-6">
+                <h3 class="text-lg font-bold text-brand-900">{o.title}</h3>
+                <p class="flex-1 text-sm leading-relaxed text-ink/70">{o.text}</p>
+                <span class="mt-2 text-sm font-semibold text-brand-700 group-hover:underline">{o.cta} →</span>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Story video -->
+  <section class="bg-brand-950 py-20 text-white lg:py-28">
+    <div class="container-page grid items-center gap-10 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
+      <div class="space-y-4">
+        <p class="text-xs font-semibold tracking-[0.18em] text-sun-300 uppercase">Our story</p>
+        <h2 class="text-3xl font-bold md:text-4xl">See the change we’re making together.</h2>
+        <p class="text-white/70">
+          Hear from the young people, mentors and partners behind YEA, and see what happens when youths are given the
+          skills and support to thrive.
+        </p>
+      </div>
+      <div class="aspect-video overflow-hidden rounded-2xl ring-1 ring-white/10">
+        <MediaVideo media="home-story" mode="player" poster="home-video-poster" label="the YEA story" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery -->
+  <section class="container-page space-y-10 py-20 lg:py-28">
+    <div class="max-w-2xl space-y-3">
+      <p class="eyebrow">Community</p>
+      <h2 class="text-3xl font-bold text-brand-900 md:text-4xl">Moments from our community.</h2>
+    </div>
+    <div class="grid auto-rows-[9rem] grid-cols-2 gap-3 sm:auto-rows-[12rem] md:grid-cols-4 md:gap-4">
+      {
+        gallery.map((g) => (
+          <div class:list={['overflow-hidden rounded-2xl', g.className]}>
+            <MediaImage media={g.slot} alt="YEA community moment" sizes={g.slot === 'home-gallery-6' ? '100vw' : '(min-width: 768px) 25vw, 50vw'} widths={[400, 800, 1200, 2400]} />
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Call to action -->
+  <section class="container-page pb-20 lg:pb-28">
+    <div class="relative overflow-hidden rounded-3xl bg-brand-700 px-6 py-14 text-center text-white md:px-16">
+      <div class="absolute -top-24 -right-24 size-72 rounded-full bg-sun-400/25 blur-3xl" aria-hidden="true"></div>
+      <div class="relative mx-auto max-w-2xl space-y-5">
+        <h2 class="text-3xl font-bold md:text-4xl">Your future starts with one step.</h2>
+        <p class="text-white/80">Create a free account to enrol in courses, request a mentor, register for events and apply for jobs.</p>
+        <div class="flex flex-wrap justify-center gap-3">
+          <a href="/login?mode=signup" class="btn-accent px-6 py-3 text-base">Create an account</a>
+          <a href="/courses" class="btn-ghost px-6 py-3 text-base">Browse courses</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

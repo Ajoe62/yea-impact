@@ -1,0 +1,109 @@
+---
+import { actions, isInputError } from 'astro:actions';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MediaImage from '../components/media/MediaImage.astro';
+import Notice from '../components/Notice.astro';
+
+const params = Astro.url.searchParams;
+// Only allow same-site paths, so `?next=` can't send people to another site.
+const rawNext = params.get('next') ?? '/';
+const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/';
+
+const loginResult = Astro.getActionResult(actions.login);
+const signupResult = Astro.getActionResult(actions.signup);
+const signOutResult = Astro.getActionResult(actions.signOut);
+
+if (signOutResult && !signOutResult.error) return Astro.redirect('/');
+if (loginResult?.data || signupResult?.data?.signedIn) return Astro.redirect(next);
+
+const user = Astro.locals.user;
+const isSignUp = signupResult ? true : loginResult ? false : params.get('mode') === 'signup';
+const result = isSignUp ? signupResult : loginResult;
+const fieldErrors = result?.error && isInputError(result.error) ? result.error.fields : {};
+const formError = result?.error && !isInputError(result.error) ? result.error.message : undefined;
+const needsConfirmation = signupResult?.data && !signupResult.data.signedIn;
+
+const nextQuery = next === '/' ? '' : `&next=${encodeURIComponent(next)}`;
+const formAction = `${isSignUp ? actions.signup : actions.login}${nextQuery}`;
+const switchHref = `/login?mode=${isSignUp ? 'login' : 'signup'}${nextQuery}`;
+---
+
+<BaseLayout title={isSignUp ? 'Create an account' : 'Sign in'}>
+  <section class="container-page grid items-stretch gap-10 py-10 lg:grid-cols-2 lg:py-16">
+    <div class="hidden overflow-hidden rounded-3xl lg:block">
+      <div class="relative h-full min-h-[36rem]">
+        <MediaImage media="login-side" alt="Young people at a YEA event" sizes="50vw" priority />
+      </div>
+    </div>
+
+    <div class="flex items-center justify-center">
+      <div class="w-full max-w-md space-y-8">
+        {
+          user ? (
+            <div class="space-y-5">
+              <h1 class="text-3xl font-bold text-brand-900">You’re signed in</h1>
+              <p class="text-ink/70">
+                Signed in as <strong>{user.email}</strong>.
+              </p>
+              <div class="flex flex-wrap gap-3">
+                <a href="/courses" class="btn-primary">Browse courses</a>
+                <form method="POST" action={actions.signOut}>
+                  <button class="btn-outline">Sign out</button>
+                </form>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div class="space-y-2">
+                <p class="eyebrow">{isSignUp ? 'Join YEA' : 'Welcome back'}</p>
+                <h1 class="text-3xl font-bold text-brand-900 md:text-4xl">{isSignUp ? 'Create an account' : 'Sign in'}</h1>
+                <p class="text-ink/70">
+                  {isSignUp
+                    ? 'Enrol in courses, request mentors, register for events and apply for jobs.'
+                    : 'Sign in to continue where you left off.'}
+                </p>
+              </div>
+
+              {needsConfirmation ? (
+                <Notice tone="success">
+                  Account created. Check your email for a confirmation link, then come back and sign in.
+                </Notice>
+              ) : (
+                <form method="POST" action={formAction} class="space-y-5">
+                  <div>
+                    <label for="email" class="label">Email</label>
+                    <input id="email" name="email" type="email" autocomplete="email" required class="field" aria-invalid={fieldErrors.email ? 'true' : undefined} />
+                    {fieldErrors.email && <p class="mt-1 text-sm text-red-700">{fieldErrors.email.join(' ')}</p>}
+                  </div>
+                  <div>
+                    <label for="password" class="label">Password</label>
+                    <input
+                      id="password"
+                      name="password"
+                      type="password"
+                      autocomplete={isSignUp ? 'new-password' : 'current-password'}
+                      minlength="6"
+                      required
+                      class="field"
+                      aria-invalid={fieldErrors.password ? 'true' : undefined}
+                    />
+                    {fieldErrors.password && <p class="mt-1 text-sm text-red-700">{fieldErrors.password.join(' ')}</p>}
+                  </div>
+                  {formError && <Notice tone="error">{formError}</Notice>}
+                  <button class="btn-primary w-full py-3">{isSignUp ? 'Create account' : 'Sign in'}</button>
+                </form>
+              )}
+
+              <p class="text-center text-sm text-ink/70">
+                {isSignUp ? 'Already have an account?' : 'Don’t have an account?'}{' '}
+                <a href={switchHref} class="font-semibold text-brand-700 hover:underline">
+                  {isSignUp ? 'Sign in' : 'Create one'}
+                </a>
+              </p>
+            </>
+          )
+        }
+      </div>
+    </div>
+  </section>
+</BaseLayout>

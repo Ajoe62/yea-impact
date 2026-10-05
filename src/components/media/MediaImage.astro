@@ -1,0 +1,55 @@
+---
+import { Image } from 'astro:assets';
+import { findImage, imageSlots, type ImageSlot } from '../../lib/media';
+import Placeholder from './Placeholder.astro';
+
+/**
+ * Renders the optimised image for a slot, or a placeholder until one is added.
+ * The wrapper controls the size; the image always covers it.
+ */
+interface Props {
+  media: ImageSlot;
+  alt: string;
+  /** Responsive `sizes` hint, e.g. "(min-width: 1024px) 50vw, 100vw". */
+  sizes?: string;
+  widths?: number[];
+  /** Set for above-the-fold images such as heroes. */
+  priority?: boolean;
+  tone?: 'light' | 'dark';
+  /** Placeholder label position; 'end' keeps it clear of overlaid text. */
+  align?: 'center' | 'end';
+  class?: string;
+}
+
+const {
+  media,
+  alt,
+  sizes = '100vw',
+  widths = [480, 800, 1200, 1600, 2400],
+  priority = false,
+  tone,
+  align,
+  class: className,
+} = Astro.props;
+const image = findImage(media);
+const meta = imageSlots[media];
+// Never upscale: only ask for widths the source file can provide.
+const fitWidths = image ? widths.filter((w) => w <= image.width) : [];
+const srcWidths = image && fitWidths.length === 0 ? [image.width] : fitWidths;
+---
+
+{
+  image ? (
+    <Image
+      src={image}
+      alt={alt}
+      widths={srcWidths}
+      sizes={sizes}
+      loading={priority ? 'eager' : 'lazy'}
+      fetchpriority={priority ? 'high' : 'auto'}
+      class:list={['h-full w-full object-cover', className]}
+    />
+  ) : (
+    <Placeholder kind="image" media={media} label={meta.label} size={meta.size} hint={meta.hint} tone={tone} align={align} class={className} />
+  )
+}

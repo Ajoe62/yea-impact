@@ -1,0 +1,71 @@
+---
+import { actions } from 'astro:actions';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHero from '../../../components/PageHero.astro';
+import Notice from '../../../components/Notice.astro';
+import { formatDateTime } from '../../../lib/format';
+
+const { id } = Astro.params;
+const { supabase, user } = Astro.locals;
+if (!supabase || !id) return Astro.rewrite('/404');
+
+const { data: event } = await supabase
+  .from('events')
+  .select('id, title, description, event_date, location')
+  .eq('id', id)
+  .single();
+if (!event) return Astro.rewrite('/404');
+
+const result = Astro.getActionResult(actions.registerForEvent);
+---
+
+<BaseLayout title={event.title} description={event.description ?? undefined}>
+  <PageHero media="events-hero" alt="" eyebrow="Event" title={event.title} compact>
+    <p class="text-sm text-white/75">
+      {formatDateTime(event.event_date)}
+      {event.location && <> · {event.location}</>}
+    </p>
+  </PageHero>
+
+  <div class="container-page grid gap-10 py-12 lg:grid-cols-[1fr_22rem] lg:py-16">
+    <div class="space-y-6">
+      <h2 class="text-2xl font-bold text-brand-900">About this event</h2>
+      <p class="text-lg leading-relaxed whitespace-pre-line text-ink/75">{event.description}</p>
+    </div>
+
+    <aside class="lg:sticky lg:top-24 lg:self-start">
+      <div class="card space-y-4 p-6">
+        <h2 class="text-lg font-bold text-brand-900">Register</h2>
+        {
+          result?.data ? (
+            <div class="space-y-4">
+              <Notice tone="success">You have successfully registered!</Notice>
+              {result.data.qrUrl && (
+                <div class="space-y-3 text-center">
+                  <img src={result.data.qrUrl} alt="Your check-in QR code" width="200" height="200" class="mx-auto rounded-lg ring-1 ring-brand-900/10" />
+                  <p class="text-sm text-ink/70">Save or screenshot this QR code. You will need it to check in at the event.</p>
+                  <a href={result.data.qrUrl} download class="btn-outline">
+                    Download QR code
+                  </a>
+                </div>
+              )}
+            </div>
+          ) : user ? (
+            <form method="POST" action={actions.registerForEvent} class="space-y-3">
+              <input type="hidden" name="eventId" value={event.id} />
+              {result?.error && <Notice tone="error">{result.error.message}</Notice>}
+              <button class="btn-primary w-full">Register for this event</button>
+            </form>
+          ) : (
+            <>
+              <p class="text-sm text-ink/70">Sign in to register and get your check-in QR code.</p>
+              <a href={`/login?next=${encodeURIComponent(Astro.url.pathname)}`} class="btn-primary w-full">
+                Sign in to register
+              </a>
+            </>
+          )
+        }
+      </div>
+    </aside>
+  </div>
+</BaseLayout>

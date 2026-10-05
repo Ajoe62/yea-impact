@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import EmptyState from '../../components/EmptyState.astro';
+
+const supabase = Astro.locals.supabase;
+const { data: courses } = supabase
+  ? await supabase.from('courses').select('id, name, description').order('name', { ascending: true })
+  : { data: null };
+---
+
+<BaseLayout title="Courses" description="In-demand digital skills courses from YEA.">
+  <PageHero
+    media="courses-hero"
+    alt="Students in a digital skills class"
+    eyebrow="Courses"
+    title="Digital skills courses"
+    subtitle="Build in-demand tech skills, one module at a time."
+  />
+
+  <section class="container-page py-14 lg:py-20">
+    {
+      courses && courses.length > 0 ? (
+        <ul class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {courses.map((course) => (
+            <li>
+              <a href={`/courses/${course.id}`} class="card group flex h-full flex-col gap-3 p-6 transition hover:-translate-y-0.5 hover:shadow-md">
+                <h2 class="text-lg font-bold text-brand-900 group-hover:text-brand-700">{course.name}</h2>
+                <p class="line-clamp-3 flex-1 text-sm leading-relaxed text-ink/70">{course.description}</p>
+                <span class="text-sm font-semibold text-brand-700">View course →</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <EmptyState message="No courses available at the moment." />
+      )
+    }
+  </section>
+</BaseLayout>

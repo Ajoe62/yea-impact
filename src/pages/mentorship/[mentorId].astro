@@ -1,0 +1,62 @@
+---
+import { actions } from 'astro:actions';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import Notice from '../../components/Notice.astro';
+import { one } from '../../lib/format';
+
+const { mentorId } = Astro.params;
+const { supabase, user } = Astro.locals;
+if (!supabase || !mentorId) return Astro.rewrite('/404');
+
+const { data: mentor } = await supabase
+  .from('mentors')
+  .select('id, bio, expertise, profiles(display_name)')
+  .eq('id', mentorId)
+  .single();
+if (!mentor) return Astro.rewrite('/404');
+
+const name = one(mentor.profiles)?.display_name || 'Mentor';
+const result = Astro.getActionResult(actions.requestMentorship);
+---
+
+<BaseLayout title={name} description={mentor.bio ?? undefined}>
+  <PageHero media="mentorship-hero" alt="" eyebrow="Mentor" title={name} compact>
+    {mentor.expertise && <p class="text-sm text-white/75">Expertise: {mentor.expertise}</p>}
+  </PageHero>
+
+  <div class="container-page grid gap-10 py-12 lg:grid-cols-[1fr_24rem] lg:py-16">
+    <div class="space-y-6">
+      <h2 class="text-2xl font-bold text-brand-900">About {name}</h2>
+      <p class="text-lg leading-relaxed whitespace-pre-line text-ink/75">{mentor.bio}</p>
+    </div>
+
+    <aside class="lg:sticky lg:top-24 lg:self-start">
+      <div class="card space-y-4 p-6">
+        <h2 class="text-lg font-bold text-brand-900">Request mentorship</h2>
+        {
+          result?.data ? (
+            <Notice tone="success">Request submitted successfully!</Notice>
+          ) : user ? (
+            <form method="POST" action={actions.requestMentorship} class="space-y-4">
+              <input type="hidden" name="mentorId" value={mentor.id} />
+              <div>
+                <label for="message" class="label">Message to mentor (optional)</label>
+                <textarea id="message" name="message" rows="4" class="field" placeholder="Tell them a little about your goals." />
+              </div>
+              {result?.error && <Notice tone="error">{result.error.message}</Notice>}
+              <button class="btn-primary w-full">Send request</button>
+            </form>
+          ) : (
+            <>
+              <p class="text-sm text-ink/70">Sign in to request mentorship from {name}.</p>
+              <a href={`/login?next=${encodeURIComponent(Astro.url.pathname)}`} class="btn-primary w-full">
+                Sign in to request
+              </a>
+            </>
+          )
+        }
+      </div>
+    </aside>
+  </div>
+</BaseLayout>

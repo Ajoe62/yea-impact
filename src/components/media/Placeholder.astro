@@ -1,0 +1,82 @@
+---
+/**
+ * Shown wherever a media slot has no file yet. In development it tells you
+ * exactly which file to add; in production it is a quiet neutral block.
+ */
+interface Props {
+  kind: 'image' | 'video';
+  media: string;
+  label: string;
+  size: string;
+  hint?: string;
+  tone?: 'light' | 'dark';
+  /** Where the label sits; use 'end' when text is overlaid on the left. */
+  align?: 'center' | 'end';
+  class?: string;
+}
+
+const { kind, media, label, size, hint, tone = 'light', align = 'center', class: className } = Astro.props;
+const file = kind === 'image' ? `src/assets/images/${media}.jpg` : `src/assets/videos/${media}.mp4`;
+const showHelp = import.meta.env.DEV;
+---
+
+<div
+  class:list={[
+    'placeholder relative flex h-full w-full overflow-hidden',
+    align === 'end' ? 'items-start justify-end pt-8 pr-8 max-md:hidden' : 'items-center justify-center',
+    tone === 'dark' ? 'placeholder-dark text-white/80' : 'text-brand-900/70',
+    className,
+  ]}
+  role="img"
+  aria-label={`${label} placeholder`}
+>
+  <div class="relative z-10 flex max-w-xs flex-col items-center gap-2 p-4 text-center">
+    {
+      kind === 'image' ? (
+        <svg class="size-9 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <circle cx="9" cy="10" r="2" />
+          <path d="m21 16-5-5-9 9" />
+        </svg>
+      ) : (
+        <svg class="size-9 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <rect x="2" y="5" width="15" height="14" rx="2" />
+          <path d="m17 10 5-3v10l-5-3z" />
+        </svg>
+      )
+    }
+    <p class="font-display text-sm font-semibold tracking-wide uppercase">{label}</p>
+    {
+      showHelp && (
+        <>
+          <p class="text-xs leading-relaxed opacity-80">
+            Add <code class="rounded bg-black/10 px-1 py-0.5 font-mono text-[11px]">{file}</code>
+          </p>
+          <p class="text-[11px] opacity-70">
+            {size}
+            {hint && <> · {hint}</>}
+          </p>
+        </>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .placeholder {
+    background-color: var(--color-brand-100);
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent 0 14px,
+      color-mix(in oklab, var(--color-brand-700) 7%, transparent) 14px 15px
+    );
+  }
+  .placeholder-dark {
+    background-color: var(--color-brand-900);
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent 0 14px,
+      color-mix(in oklab, white 6%, transparent) 14px 15px
+    );
+  }
+</style>

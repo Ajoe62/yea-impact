@@ -1,0 +1,22 @@
+---
+import { isSupabaseConfigured } from '../lib/supabase';
+
+/** Shown when a list is empty, with a setup hint when Supabase isn't connected. */
+interface Props {
+  message: string;
+}
+
+const { message } = Astro.props;
+---
+
+<div class="card flex flex-col items-center gap-2 px-6 py-14 text-center">
+  <p class="font-display text-lg font-semibold text-brand-900">{message}</p>
+  {
+    !isSupabaseConfigured && (
+      <p class="max-w-md text-sm text-ink/60">
+        Supabase isn’t connected yet. Copy <code class="font-mono">.env.example</code> to <code class="font-mono">.env</code>,
+        add your project keys, then restart the dev server.
+      </p>
+    )
+  }
+</div>
