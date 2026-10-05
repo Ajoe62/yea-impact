@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import { dateBadge, formatDateTime } from '../../lib/format';
+
+const supabase = Astro.locals.supabase;
+const { data: events } = supabase
+  ? await supabase.from('events').select('id, title, description, event_date, location').order('event_date', { ascending: true })
+  : { data: null };
+---
+
+<BaseLayout title="Events" description="Upcoming YEA events and workshops.">
+  <PageHero
+    media="events-hero"
+    alt="A YEA event"
+    eyebrow="Events"
+    title="Upcoming events"
+    subtitle="Workshops, meetups and gatherings. Register once and check in with your QR code."
+  />
+
+  <section class="container-page py-14 lg:py-20">
+    {
+      events && events.length > 0 ? (
+        <ul class="space-y-4">
+          {events.map((event) => {
+            const badge = dateBadge(event.event_date);
+            return (
+              <li>
+                <a href={`/events/${event.id}`} class="card group flex gap-5 p-5 transition hover:shadow-md md:p-6">
+                  <div class="flex size-16 shrink-0 flex-col items-center justify-center rounded-xl bg-brand-700 text-white">
+                    {badge ? (
+                      <>
+                        <span class="font-display text-2xl leading-none font-bold">{badge.day}</span>
+                        <span class="text-xs tracking-wide uppercase">{badge.month}</span>
+                      </>
+                    ) : (
+                      <span class="text-xs">TBA</span>
+                    )}
+                  </div>
+                  <div class="min-w-0 flex-1 space-y-1">
+                    <h2 class="text-lg font-bold text-brand-900 group-hover:text-brand-700">{event.title}</h2>
+                    <p class="text-sm text-ink/60">
+                      {formatDateTime(event.event_date)}
+                      {event.location && <> · {event.location}</>}
+                    </p>
+                    <p class="line-clamp-2 text-sm text-ink/70">{event.description}</p>
+                  </div>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <EmptyState message="There are no upcoming events at the moment." />
+      )
+    }
+  </section>
+</BaseLayout>

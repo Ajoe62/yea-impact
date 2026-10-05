@@ -1,0 +1,109 @@
+---
+import { actions } from 'astro:actions';
+import { Image } from 'astro:assets';
+import logo from '../assets/images/logo.png';
+
+const links = [
+  { href: '/programs', label: 'Programs' },
+  { href: '/courses', label: 'Courses' },
+  { href: '/mentorship', label: 'Mentorship' },
+  { href: '/events', label: 'Events' },
+  { href: '/jobs', label: 'Jobs' },
+];
+
+const path = Astro.url.pathname;
+const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
+// Undefined on prerendered pages (the home page), where no session is read.
+const user = Astro.locals.user;
+---
+
+<!-- Total height is --header-h (global.css): 3px accent rule + 4rem bar + 1px border. -->
+<header class="sticky top-0 z-40 border-t-3 border-b border-t-brand-700 border-b-brand-900/15 bg-white shadow-[0_6px_20px_-12px_rgb(7_39_28/0.25)]">
+  <div class="container-page flex h-16 items-center justify-between gap-6">
+    <a href="/" class="flex shrink-0 items-center gap-3" aria-label="Dynamic Youth Empowerment & Advocacy home">
+      <Image src={logo} alt="" loading="eager" class="size-13 rounded-full shadow-sm ring-1 ring-brand-900/10" />
+      <!-- Hidden at tablet widths, where the nav needs the room. -->
+      <span class="font-display text-sm leading-tight font-bold text-brand-800 md:max-lg:hidden">
+        Dynamic Youth<br />Empowerment &amp; Advocacy
+      </span>
+    </a>
+
+    <nav class="hidden items-center gap-1 md:flex" aria-label="Main">
+      {
+        links.map((l) => (
+          <a
+            href={l.href}
+            class:list={[
+              'rounded-full px-3.5 py-2 text-sm font-medium transition',
+              isActive(l.href) ? 'bg-brand-700/10 text-brand-800' : 'text-ink/70 hover:bg-brand-900/5 hover:text-ink',
+            ]}
+            aria-current={isActive(l.href) ? 'page' : undefined}
+          >
+            {l.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="hidden md:block">
+      {
+        user ? (
+          <form method="POST" action={`/login${actions.signOut}`}>
+            <button class="btn-outline" title={user.email}>Sign out</button>
+          </form>
+        ) : (
+          <a href="/login" class="btn-primary">Sign in</a>
+        )
+      }
+    </div>
+
+    <button
+      type="button"
+      class="flex size-10 items-center justify-center rounded-full text-ink hover:bg-brand-900/5 md:hidden"
+      aria-controls="mobile-nav"
+      aria-expanded="false"
+      aria-label="Open menu"
+      data-menu-toggle
+    >
+      <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16" />
+      </svg>
+    </button>
+  </div>
+
+  <nav id="mobile-nav" class="hidden border-t border-brand-900/10 md:hidden" aria-label="Main">
+    <div class="container-page flex flex-col gap-1 py-3">
+      {
+        links.map((l) => (
+          <a
+            href={l.href}
+            class:list={['rounded-xl px-3 py-2.5 font-medium', isActive(l.href) ? 'bg-brand-700/10 text-brand-800' : 'text-ink/80']}
+            aria-current={isActive(l.href) ? 'page' : undefined}
+          >
+            {l.label}
+          </a>
+        ))
+      }
+      {
+        user ? (
+          <form method="POST" action={`/login${actions.signOut}`} class="mt-2">
+            <button class="btn-outline w-full">Sign out</button>
+          </form>
+        ) : (
+          <a href="/login" class="btn-primary mt-2">Sign in</a>
+        )
+      }
+    </div>
+  </nav>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.getElementById('mobile-nav');
+  toggle?.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') !== 'true';
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    menu?.classList.toggle('hidden', !open);
+  });
+</script>

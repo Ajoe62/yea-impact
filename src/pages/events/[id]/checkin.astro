@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+/**
+ * Opened by scanning a registration QR code. Validates the token against
+ * `event_registrations` and marks the attendee as checked in.
+ */
+const { id } = Astro.params;
+const token = Astro.url.searchParams.get('token');
+const supabase = Astro.locals.supabase;
+if (!supabase || !id || !token) return Astro.rewrite('/404');
+
+const { data: registration, error } = await supabase
+  .from('event_registrations')
+  .select('id, checked_in')
+  .eq('event_id', id)
+  .eq('token', token)
+  .single();
+
+const valid = Boolean(registration && !error);
+if (registration && !registration.checked_in) {
+  await supabase.from('event_registrations').update({ checked_in: true }).eq('id', registration.id);
+}
+---
+
+<BaseLayout title="Event check-in">
+  <section class="container-page flex min-h-[60vh] items-center justify-center py-16">
+    <div class="card max-w-md space-y-4 p-10 text-center">
+      <div
+        class:list={[
+          'mx-auto flex size-16 items-center justify-center rounded-full',
+          valid ? 'bg-brand-100 text-brand-700' : 'bg-red-50 text-red-600',
+        ]}
+        aria-hidden="true"
+      >
+        <svg class="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          {valid ? <path d="m5 12 5 5 9-10" /> : <path d="M6 6l12 12M18 6 6 18" />}
+        </svg>
+      </div>
+      {
+        valid ? (
+          <>
+            <h1 class="text-2xl font-bold text-brand-800">Check-in successful</h1>
+            <p class="text-ink/70">Welcome! Your attendance has been recorded.</p>
+          </>
+        ) : (
+          <>
+            <h1 class="text-2xl font-bold text-red-700">Invalid or expired token</h1>
+            <p class="text-ink/70">Please make sure you scanned the correct QR code.</p>
+          </>
+        )
+      }
+      <a href={`/events/${id}`} class="btn-outline">Back to event</a>
+    </div>
+  </section>
+</BaseLayout>

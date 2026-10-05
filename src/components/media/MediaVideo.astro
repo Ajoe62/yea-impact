@@ -1,0 +1,105 @@
+---
+import { getImage } from 'astro:assets';
+import { findImage, findVideos, videoSlots, type ImageSlot, type VideoSlot } from '../../lib/media';
+import Placeholder from './Placeholder.astro';
+
+/**
+ * A video slot.
+ *  - `player`: a normal video with controls and sound.
+ *  - `background`: a muted loop behind content, with a pause button. It does
+ *    not autoplay for visitors who ask for reduced motion.
+ * Renders nothing in background mode when no file exists (the caller shows an
+ * image instead); renders a placeholder in player mode.
+ */
+interface Props {
+  media: VideoSlot;
+  mode: 'player' | 'background';
+  /** Image slot used as the poster frame. */
+  poster?: ImageSlot;
+  /** Accessible description of the video. */
+  label: string;
+  class?: string;
+}
+
+const { media, mode, poster, label, class: className } = Astro.props;
+const sources = findVideos(media);
+const posterImage = poster ? findImage(poster) : undefined;
+const posterSrc = posterImage ? (await getImage({ src: posterImage, width: 1920 })).src : undefined;
+const meta = videoSlots[media];
+---
+
+{
+  sources.length > 0 && mode === 'background' && (
+    <div class:list={['bg-video absolute inset-0', className]}>
+      <video
+        class="h-full w-full object-cover"
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        poster={posterSrc}
+        aria-hidden="true"
+        data-bg-video
+      >
+        {sources.map((s) => (
+          <source src={s.src} type={s.type} />
+        ))}
+      </video>
+      <button
+        type="button"
+        class="absolute right-4 bottom-4 z-20 flex size-10 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur transition hover:bg-black/65 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        aria-label={`Pause background video: ${label}`}
+        data-bg-toggle
+      >
+        <svg class="size-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-icon-pause>
+          <rect x="6" y="5" width="4" height="14" rx="1" />
+          <rect x="14" y="5" width="4" height="14" rx="1" />
+        </svg>
+        <svg class="hidden size-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-icon-play>
+          <path d="M8 5v14l11-7z" />
+        </svg>
+      </button>
+    </div>
+  )
+}
+
+{
+  sources.length > 0 && mode === 'player' && (
+    <video class:list={['h-full w-full bg-black object-cover', className]} controls preload="metadata" poster={posterSrc} aria-label={label}>
+      {sources.map((s) => (
+        <source src={s.src} type={s.type} />
+      ))}
+      Your browser can’t play this video.
+    </video>
+  )
+}
+
+{
+  sources.length === 0 && mode === 'player' && (
+    <Placeholder kind="video" media={media} label={meta.label} size={meta.size} hint={meta.hint} tone="dark" class={className} />
+  )
+}
+
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.querySelectorAll<HTMLElement>('.bg-video').forEach((wrap) => {
+    const video = wrap.querySelector<HTMLVideoElement>('[data-bg-video]');
+    const toggle = wrap.querySelector<HTMLButtonElement>('[data-bg-toggle]');
+    if (!video || !toggle) return;
+
+    const label = toggle.getAttribute('aria-label')!.replace(/^(Pause|Play)/, '');
+    const sync = () => {
+      toggle.setAttribute('aria-label', `${video.paused ? 'Play' : 'Pause'}${label}`);
+      toggle.querySelector('[data-icon-pause]')!.classList.toggle('hidden', video.paused);
+      toggle.querySelector('[data-icon-play]')!.classList.toggle('hidden', !video.paused);
+    };
+
+    video.addEventListener('play', sync);
+    video.addEventListener('pause', sync);
+    toggle.addEventListener('click', () => (video.paused ? video.play() : video.pause()));
+
+    if (!reduceMotion.matches) video.play().catch(sync);
+    sync();
+  });
+</script>

@@ -1,0 +1,92 @@
+---
+import MediaImage from './media/MediaImage.astro';
+import type { ImageSlot } from '../lib/media';
+
+/**
+ * Banner at the top of every inner page. With `media`, an image slot sits
+ * behind it; without, it is a plain brand gradient with a faint dot pattern.
+ */
+interface Props {
+  media?: ImageSlot;
+  alt?: string;
+  eyebrow?: string;
+  title: string;
+  subtitle?: string;
+  /** Smaller banner for detail pages (image variant only). */
+  compact?: boolean;
+}
+
+const { media, alt = '', eyebrow, title, subtitle, compact = false } = Astro.props;
+---
+
+{
+  media ? (
+    <section class:list={['relative isolate overflow-hidden bg-brand-950', compact ? 'min-h-56' : 'min-h-72 md:min-h-96']}>
+      <div class="absolute inset-0 -z-10">
+        <MediaImage media={media} alt={alt} priority tone="dark" align="end" />
+      </div>
+      <div class="absolute inset-0 -z-10 bg-linear-to-t from-brand-950/90 via-brand-950/55 to-brand-950/20" aria-hidden="true"></div>
+
+      <div class:list={['container-page flex h-full flex-col justify-end', compact ? 'min-h-56 py-10' : 'min-h-72 py-12 md:min-h-96 md:py-16']}>
+        <div class="max-w-3xl space-y-3 text-white">
+          {eyebrow && <p class="text-xs font-semibold tracking-[0.18em] text-sun-300 uppercase">{eyebrow}</p>}
+          <h1 class:list={['font-bold', compact ? 'text-3xl md:text-4xl' : 'text-4xl md:text-5xl']}>{title}</h1>
+          {subtitle && <p class="max-w-2xl text-base text-white/80 md:text-lg">{subtitle}</p>}
+          <slot />
+        </div>
+      </div>
+    </section>
+  ) : (
+    <section class="page-hero">
+      <div class="container-page">
+        {eyebrow && <p class="page-hero-eyebrow">{eyebrow}</p>}
+        <h1>{title}</h1>
+        {subtitle && <p class="page-hero-lead">{subtitle}</p>}
+        <slot />
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .page-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 3.6rem 0 3.2rem;
+    color: #fff;
+    background: radial-gradient(ellipse at 30% 40%, var(--color-brand-700) 0%, var(--color-brand-950) 70%);
+  }
+
+  .page-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: radial-gradient(rgb(255 255 255 / 0.09) 1px, transparent 1.5px);
+    background-size: 22px 22px;
+  }
+
+  .page-hero-eyebrow {
+    margin-bottom: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-sun-300);
+  }
+
+  .page-hero h1 {
+    font-size: clamp(2rem, 4.4vw, 3.1rem);
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .page-hero-lead {
+    max-width: 62ch;
+    margin-top: 1rem;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: rgb(255 255 255 / 0.8);
+  }
+</style>

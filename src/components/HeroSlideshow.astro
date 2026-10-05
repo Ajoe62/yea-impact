@@ -1,0 +1,520 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { VideoSource } from '../lib/media';
+
+/**
+ * Full-screen hero with a looping, cross-fading background slideshow: every
+ * video clip in order, then every photo, then round again. With no media, or
+ * for visitors who ask for reduced motion, only the brand gradient shows.
+ * The default slot renders under the buttons (e.g. a row of stats).
+ */
+interface Props {
+  /** MP4 URLs, or per-clip source lists (e.g. a .webm and an .mp4), in play order. */
+  clips?: (string | VideoSource[])[];
+  /** Photos shown after the clips, in order. */
+  images?: ImageMetadata[];
+  eyebrow?: string;
+  /** Trusted HTML: wrap one word in <em> to highlight it. */
+  headline: string;
+  lead?: string;
+  buttons?: { label: string; href: string; variant?: 'accent' | 'ghost' }[];
+  class?: string;
+}
+
+const { clips = [], images = [], eyebrow, headline, lead, buttons = [], class: className } = Astro.props;
+
+const videoSlides = clips.map((clip) => (typeof clip === 'string' ? [{ src: clip, type: 'video/mp4' }] : clip));
+const hasSlides = videoSlides.length + images.length > 0;
+const firstIsImage = videoSlides.length === 0;
+
+// Never upscale: only ask for widths the source file can provide.
+const imageWidths = (image: ImageMetadata) => {
+  const fit = [768, 1200, 1672].filter((w) => w <= image.width);
+  return fit.length > 0 ? fit : [image.width];
+};
+---
+
+<section class:list={['hero', className]} data-hero-slideshow>
+  {
+    hasSlides && (
+      <div class="hero-slides" aria-hidden="true">
+        {videoSlides.map((sources, i) => (
+          <div class:list={['hero-slide', { 'is-active': i === 0 }]} data-slide>
+            <video muted playsinline autoplay={i === 0} preload={i === 0 ? 'auto' : 'none'}>
+              {sources.map((s) => (
+                <source src={s.src} type={s.type} />
+              ))}
+            </video>
+          </div>
+        ))}
+        {images.map((image, i) => {
+          const eager = firstIsImage && i === 0;
+          return (
+            <div class:list={['hero-slide', { 'is-active': eager }]} data-slide>
+              <Image
+                src={image}
+                alt=""
+                widths={imageWidths(image)}
+                sizes="100vw"
+                format="webp"
+                quality={82}
+                loading={eager ? 'eager' : 'lazy'}
+                fetchpriority={eager ? 'high' : 'auto'}
+                decoding="async"
+              />
+            </div>
+          );
+        })}
+      </div>
+    )
+  }
+  <div class="hero-vignette" aria-hidden="true"></div>
+
+  <div class="hero-content container-page">
+    {eyebrow && <p class="hero-eyebrow hero-rise" style="--rise-i: 0">{eyebrow}</p>}
+    <h1 class="hero-rise" style="--rise-i: 1" set:html={headline} />
+    {lead && <p class="hero-lead hero-rise" style="--rise-i: 2">{lead}</p>}
+    {
+      buttons.length > 0 && (
+        <div class="hero-buttons hero-rise" style="--rise-i: 3">
+          {buttons.map((b, i) => (
+            <a href={b.href} class:list={[(b.variant ?? (i === 0 ? 'accent' : 'ghost')) === 'accent' ? 'btn-accent' : 'btn-ghost', 'px-6 py-3 text-base']}>
+              {b.label}
+            </a>
+          ))}
+        </div>
+      )
+    }
+    {
+      Astro.slots.has('default') && (
+        <div class="hero-rise" style="--rise-i: 4">
+          <slot />
+        </div>
+      )
+    }
+  </div>
+
+  {
+    videoSlides.length > 0 && (
+      <button type="button" class="hero-sound" data-hero-sound data-sound="on" hidden>
+        <svg data-icon="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor" />
+          <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+          <path d="M19 5a10 10 0 0 1 0 14" />
+        </svg>
+        <svg data-icon="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor" />
+          <path d="m22 9-6 6" />
+          <path d="m16 9 6 6" />
+        </svg>
+        <span data-sound-label>Mute</span>
+      </button>
+    )
+  }
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    /* Fills the screen below the sticky header. */
+    min-height: calc(100svh - var(--header-h));
+    overflow: hidden;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    color: #fff;
+    /* Shows before the first frame loads, and on its own under reduced motion. */
+    background: radial-gradient(ellipse at 30% 40%, var(--color-brand-700) 0%, var(--color-brand-950) 70%);
+  }
+
+  .hero-slides {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .hero-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 1.5s cubic-bezier(0.455, 0.03, 0.515, 0.955);
+  }
+
+  .hero-slide.is-active {
+    opacity: 1;
+  }
+
+  /* Biased upwards so group photos keep their heads when cropped. */
+  .hero-slide video,
+  .hero-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 35%;
+  }
+
+  /*
+   * Ken Burns drift. A transition rather than a keyframe animation, so a photo
+   * keeps its zoom while it fades out and only resets once it is invisible
+   * (the 1.5s delay). @starting-style makes the first slide drift on page load.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-slide img {
+      transform: scale(1.01);
+      transform-origin: center 35%;
+      transition: transform 0s linear 1.5s;
+    }
+    .hero-slide.is-active img {
+      transform: scale(1.07);
+      transition: transform 7.5s ease-out;
+    }
+    @starting-style {
+      .hero-slide.is-active img {
+        transform: scale(1.01);
+      }
+    }
+  }
+
+  /*
+   * A near-neutral shade rather than a brand-green wash, so the photos keep
+   * their true colours: dark behind the headline on the left, clear on the
+   * right, and a soft floor under the stats.
+   */
+  .hero-vignette {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        to right,
+        rgb(4 18 13 / 0.9) 0%,
+        rgb(4 18 13 / 0.76) 30%,
+        rgb(4 18 13 / 0.34) 56%,
+        rgb(4 18 13 / 0.06) 82%,
+        rgb(4 18 13 / 0) 100%
+      ),
+      linear-gradient(to top, rgb(4 18 13 / 0.6) 0%, rgb(4 18 13 / 0) 32%),
+      linear-gradient(to bottom, rgb(4 18 13 / 0.3) 0%, rgb(4 18 13 / 0) 18%);
+  }
+
+  /* On phones the text spans the whole photo, so shade it evenly. */
+  @media (max-width: 767px) {
+    .hero-vignette {
+      background:
+        linear-gradient(to top, rgb(4 18 13 / 0.85) 0%, rgb(4 18 13 / 0.55) 55%, rgb(4 18 13 / 0.45) 100%);
+    }
+  }
+
+  /* Left-aligned at every width: the vignette is darkest on the left. */
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    padding-block: 4rem;
+    text-align: left;
+  }
+
+  .hero-eyebrow {
+    margin-bottom: 1.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-sun-300);
+  }
+
+  .hero h1 {
+    max-width: 18ch;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    text-shadow:
+      0 2px 22px rgb(0 0 0 / 0.55),
+      0 1px 3px rgb(0 0 0 / 0.5);
+  }
+
+  .hero h1 :global(em) {
+    font-style: italic;
+    color: var(--color-sun-300);
+  }
+
+  .hero-lead {
+    max-width: 46ch;
+    margin-top: 1.5rem;
+    font-size: 1.14rem;
+    line-height: 1.6;
+    color: rgb(255 255 255 / 0.85);
+    text-shadow: 0 1px 12px rgb(0 0 0 / 0.4);
+  }
+
+  .hero-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+  }
+
+  .hero-sound {
+    position: absolute;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1.05rem 0.55rem 0.85rem;
+    border: 1px solid rgb(255 255 255 / 0.35);
+    border-radius: 999px;
+    background: rgb(7 39 28 / 0.55);
+    backdrop-filter: blur(6px);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .hero-sound:hover {
+    background: rgb(7 39 28 / 0.75);
+  }
+
+  .hero-sound:focus-visible {
+    outline: 2px solid var(--color-sun-300);
+    outline-offset: 3px;
+  }
+
+  .hero-sound[hidden],
+  .hero-sound[data-sound='on'] [data-icon='off'],
+  .hero-sound[data-sound='off'] [data-icon='on'] {
+    display: none;
+  }
+
+  .hero-sound svg {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  /*
+   * Entrance. Text is only hidden once the inline script in BaseLayout has
+   * added .motion to <html>, so a failed script still leaves it visible.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.motion) .hero-rise {
+      animation: hero-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-delay: calc(0.15s + var(--rise-i, 0) * 0.12s);
+    }
+  }
+
+  @keyframes hero-rise {
+    from {
+      opacity: 0;
+      transform: translateY(34px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-slides,
+    .hero-sound {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const FADE_MS = 1500;
+  const IMAGE_MS = 6000;
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  /** Stops all media downloads. Hiding the slides alone won't stop the autoplaying first clip. */
+  function stopMedia(hero: HTMLElement) {
+    hero.querySelectorAll('video').forEach((video) => {
+      video.pause();
+      video.querySelectorAll('source').forEach((source) => source.removeAttribute('src'));
+      video.load();
+    });
+    hero.querySelectorAll('[data-slide] img').forEach((img) => {
+      img.removeAttribute('srcset');
+      img.removeAttribute('src');
+    });
+  }
+
+  /** Wires up one hero and returns its cleanup. */
+  function setupHero(hero: HTMLElement): () => void {
+    if (reduceMotion.matches) {
+      stopMedia(hero);
+      return () => {};
+    }
+
+    const slides = [...hero.querySelectorAll<HTMLElement>('[data-slide]')];
+    if (slides.length === 0) return () => {};
+
+    const videoOf = (slide: HTMLElement) => slide.querySelector('video');
+    const videos = slides.map(videoOf).filter((v): v is HTMLVideoElement => v !== null);
+    const button = hero.querySelector<HTMLButtonElement>('[data-hero-sound]');
+    const label = button?.querySelector('[data-sound-label]');
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    const timers = new Set<number>();
+    // load() throws away a video's buffer, so each one is primed at most once.
+    // Clips already set to preload (the first, or after a back/forward restore) count as primed.
+    const primed = new Set(videos.filter((v) => v.preload === 'auto'));
+    let current = Math.max(0, slides.findIndex((s) => s.classList.contains('is-active')));
+    let imageTimer = 0;
+    let soundOn = true;
+
+    const later = (fn: () => void, ms: number) => {
+      const id = window.setTimeout(() => {
+        timers.delete(id);
+        fn();
+      }, ms);
+      timers.add(id);
+      return id;
+    };
+
+    const renderSound = () => {
+      if (!button || !label) return;
+      button.dataset.sound = soundOn ? 'on' : 'off';
+      label.textContent = soundOn ? 'Mute' : 'Tap for sound';
+    };
+
+    const play = (video: HTMLVideoElement) => {
+      video.muted = !soundOn;
+      video.play().catch((error: DOMException) => {
+        // The autoplay policy refused sound: fall back to muted playback.
+        if (error.name !== 'NotAllowedError' || video.muted || video !== videoOf(slides[current])) return;
+        soundOn = false;
+        renderSound();
+        video.muted = true;
+        video.play().catch(() => {});
+      });
+    };
+
+    const prime = (slide: HTMLElement) => {
+      const video = videoOf(slide);
+      if (video) {
+        if (primed.has(video)) return;
+        primed.add(video);
+        video.preload = 'auto';
+        video.load();
+      } else {
+        const img = slide.querySelector('img');
+        if (img) img.loading = 'eager';
+      }
+    };
+
+    const start = (slide: HTMLElement) => {
+      const video = videoOf(slide);
+      if (video) play(video);
+      else if (slides.length > 1) imageTimer = later(advance, IMAGE_MS);
+    };
+
+    /** Pauses and rewinds an outgoing clip once it has faded out, unless it is back on screen. */
+    const park = (slide: HTMLElement, video: HTMLVideoElement) => {
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        slide.removeEventListener('transitionend', onFaded);
+        window.clearTimeout(fallback);
+        timers.delete(fallback);
+        if (slide.classList.contains('is-active')) return;
+        video.pause();
+        video.currentTime = 0;
+      };
+      const onFaded = (event: TransitionEvent) => {
+        if (event.target === slide && event.propertyName === 'opacity') finish();
+      };
+      slide.addEventListener('transitionend', onFaded, { signal });
+      const fallback = later(finish, FADE_MS + 100);
+    };
+
+    function advance() {
+      window.clearTimeout(imageTimer);
+      timers.delete(imageTimer);
+
+      const outgoing = slides[current];
+      current = (current + 1) % slides.length;
+      const incoming = slides[current];
+
+      // The cross-fade itself is pure CSS.
+      incoming.classList.add('is-active');
+      outgoing.classList.remove('is-active');
+
+      const outgoingVideo = videoOf(outgoing);
+      if (outgoingVideo) park(outgoing, outgoingVideo);
+      start(incoming);
+      // Buffer the slide after the one now showing, a whole slide ahead.
+      prime(slides[(current + 1) % slides.length]);
+    }
+
+    videos.forEach((video) => {
+      video.addEventListener('ended', () => video === videoOf(slides[current]) && advance(), { signal });
+    });
+
+    if (button) {
+      button.hidden = false;
+      button.addEventListener(
+        'click',
+        () => {
+          soundOn = !soundOn;
+          renderSound();
+          const video = videoOf(slides[current]);
+          if (!video) return;
+          video.muted = !soundOn;
+          // The click is the user's permission, so a blocked clip can start now.
+          if (video.paused) play(video);
+        },
+        { signal },
+      );
+    }
+
+    const cleanup = () => {
+      controller.abort();
+      timers.forEach((id) => window.clearTimeout(id));
+      timers.clear();
+      videos.forEach((video) => video.pause());
+    };
+
+    reduceMotion.addEventListener(
+      'change',
+      () => {
+        if (!reduceMotion.matches) return;
+        cleanup();
+        stopMedia(hero);
+      },
+      { signal },
+    );
+
+    slides.forEach((slide, i) => slide.classList.toggle('is-active', i === current));
+    // "ended" never fires on a looping video, so a lone clip loops natively.
+    if (slides.length === 1 && videos.length === 1) videos[0].loop = true;
+    renderSound();
+    start(slides[current]);
+    if (slides.length > 1) prime(slides[(current + 1) % slides.length]);
+
+    return cleanup;
+  }
+
+  let cleanups: (() => void)[] = [];
+
+  function teardown() {
+    cleanups.forEach((fn) => fn());
+    cleanups = [];
+  }
+
+  function init() {
+    teardown();
+    cleanups = [...document.querySelectorAll<HTMLElement>('[data-hero-slideshow]')].map(setupHero);
+  }
+
+  init();
+  // Client-side navigation (Astro view transitions) and the back/forward cache.
+  document.addEventListener('astro:before-swap', teardown);
+  document.addEventListener('astro:after-swap', init);
+  window.addEventListener('pagehide', teardown);
+  window.addEventListener('pageshow', (event) => event.persisted && init());
+</script>

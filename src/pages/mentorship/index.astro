@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import { one } from '../../lib/format';
+
+const supabase = Astro.locals.supabase;
+const { data } = supabase ? await supabase.from('mentors').select('id, bio, expertise, profiles(display_name)') : { data: null };
+
+// Supabase can't order parent rows by a joined column, so sort by name here.
+const mentors = (data ?? [])
+  .map((m) => ({ ...m, name: one(m.profiles)?.display_name || 'Mentor' }))
+  .sort((a, b) => a.name.localeCompare(b.name));
+
+const initials = (name: string) =>
+  name
+    .split(/\s+/)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+---
+
+<BaseLayout title="Mentorship" description="Connect with experienced mentors through YEA.">
+  <PageHero
+    media="mentorship-hero"
+    alt="A mentor guiding a young person"
+    eyebrow="Mentorship"
+    title="Mentorship & coaching"
+    subtitle="Learn from people who have walked the path before you."
+  />
+
+  <section class="container-page py-14 lg:py-20">
+    {
+      mentors.length > 0 ? (
+        <ul class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {mentors.map((mentor) => (
+            <li>
+              <a href={`/mentorship/${mentor.id}`} class="card group flex h-full flex-col gap-4 p-6 transition hover:shadow-md">
+                <div class="flex items-center gap-4">
+                  <span class="flex size-14 shrink-0 items-center justify-center rounded-full bg-brand-100 font-display text-lg font-bold text-brand-800">
+                    {initials(mentor.name)}
+                  </span>
+                  <div>
+                    <h2 class="font-bold text-brand-900 group-hover:text-brand-700">{mentor.name}</h2>
+                    <p class="text-sm text-brand-600">{mentor.expertise}</p>
+                  </div>
+                </div>
+                <p class="line-clamp-3 text-sm leading-relaxed text-ink/70">{mentor.bio}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <EmptyState message="No mentors available at the moment." />
+      )
+    }
+  </section>
+</BaseLayout>

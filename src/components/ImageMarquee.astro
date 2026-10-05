@@ -1,0 +1,144 @@
+---
+import { Image } from 'astro:assets';
+import { marqueeImages } from '../lib/media';
+
+/**
+ * A strip of photos that scrolls continuously across the page. Photos come
+ * from src/assets/images/marquee/ (any number, in file-name order). It pauses
+ * on hover or with its button. For reduced motion it becomes a strip you
+ * scroll by hand. Renders nothing until the folder has photos.
+ */
+interface Props {
+  /** Accessible name for the strip. */
+  label: string;
+  /** Alt text applied to every photo. */
+  alt: string;
+  /** Seconds each photo adds to one full loop; higher is slower. */
+  secondsPerImage?: number;
+  class?: string;
+}
+
+const { label, alt, secondsPerImage = 5, class: className } = Astro.props;
+const images = marqueeImages;
+const duration = images.length * secondsPerImage;
+---
+
+{
+  images.length > 0 && (
+    <section class:list={['marquee relative', className]} aria-label={label} data-marquee>
+      <div class="marquee-viewport">
+        <div class="marquee-track" style={`--marquee-duration: ${duration}s`}>
+          {/* The second copy makes the loop seamless; screen readers skip it. */}
+          {[0, 1].map((copy) => (
+            <ul class="marquee-group" aria-hidden={copy === 1 ? 'true' : undefined}>
+              {images.map((image) => (
+                <li class="shrink-0 overflow-hidden rounded-2xl">
+                  <Image
+                    src={image}
+                    alt={copy === 0 ? alt : ''}
+                    height={576}
+                    loading="lazy"
+                    class="h-56 w-auto object-cover md:h-72"
+                  />
+                </li>
+              ))}
+            </ul>
+          ))}
+        </div>
+      </div>
+      <button
+        type="button"
+        class="marquee-toggle absolute right-4 bottom-4 z-10 flex size-10 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur transition hover:bg-black/65 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        aria-label="Pause scrolling photos"
+        data-marquee-toggle
+      >
+        <svg class="size-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-icon-pause>
+          <rect x="6" y="5" width="4" height="14" rx="1" />
+          <rect x="14" y="5" width="4" height="14" rx="1" />
+        </svg>
+        <svg class="hidden size-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-icon-play>
+          <path d="M8 5v14l11-7z" />
+        </svg>
+      </button>
+    </section>
+  )
+}
+
+<style>
+  .marquee-viewport {
+    overflow: hidden;
+    mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee-scroll var(--marquee-duration) linear infinite;
+  }
+
+  /* Padding equal to the gap keeps the spacing even where the two copies meet. */
+  .marquee-group {
+    display: flex;
+    gap: 1rem;
+    padding-right: 1rem;
+  }
+
+  .marquee:hover .marquee-track,
+  .marquee[data-paused] .marquee-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes marquee-scroll {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-viewport {
+      overflow-x: auto;
+      mask-image: none;
+    }
+    .marquee-track {
+      animation: none;
+      padding-inline: 1rem;
+    }
+    .marquee-group[aria-hidden],
+    .marquee-toggle {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  function setupMarquee(marquee: HTMLElement): () => void {
+    const toggle = marquee.querySelector<HTMLButtonElement>('[data-marquee-toggle]');
+    if (!toggle) return () => {};
+
+    const onClick = () => {
+      const paused = marquee.toggleAttribute('data-paused');
+      toggle.setAttribute('aria-label', `${paused ? 'Play' : 'Pause'} scrolling photos`);
+      toggle.querySelector('[data-icon-pause]')!.classList.toggle('hidden', paused);
+      toggle.querySelector('[data-icon-play]')!.classList.toggle('hidden', !paused);
+    };
+
+    toggle.addEventListener('click', onClick);
+    return () => toggle.removeEventListener('click', onClick);
+  }
+
+  let teardowns: (() => void)[] = [];
+
+  function teardown() {
+    teardowns.forEach((fn) => fn());
+    teardowns = [];
+  }
+
+  function init() {
+    teardown();
+    teardowns = [...document.querySelectorAll<HTMLElement>('[data-marquee]')].map(setupMarquee);
+  }
+
+  init();
+  document.addEventListener('astro:before-swap', teardown);
+  document.addEventListener('astro:after-swap', init);
+</script>

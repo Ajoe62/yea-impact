@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import { formatDate } from '../../lib/format';
+
+const supabase = Astro.locals.supabase;
+const { data: jobs } = supabase
+  ? await supabase.from('jobs').select('id, title, company, description, deadline').order('deadline', { ascending: true })
+  : { data: null };
+---
+
+<BaseLayout title="Jobs" description="Industry opportunities for young people from YEA partners.">
+  <PageHero
+    media="jobs-hero"
+    alt="Young professionals at work"
+    eyebrow="Opportunities"
+    title="Industry opportunities"
+    subtitle="Jobs and placements with partners who are hiring young talent."
+  />
+
+  <section class="container-page py-14 lg:py-20">
+    {
+      jobs && jobs.length > 0 ? (
+        <ul class="grid gap-4 md:grid-cols-2">
+          {jobs.map((job) => (
+            <li>
+              <a href={`/jobs/${job.id}`} class="card group flex h-full flex-col gap-2 p-6 transition hover:shadow-md">
+                <p class="text-sm font-medium text-brand-600">{job.company}</p>
+                <h2 class="text-lg font-bold text-brand-900 group-hover:text-brand-700">{job.title}</h2>
+                <p class="line-clamp-3 flex-1 text-sm leading-relaxed text-ink/70">{job.description}</p>
+                <div class="mt-2 flex items-center justify-between text-sm">
+                  <span class="text-ink/60">Apply by {formatDate(job.deadline)}</span>
+                  <span class="font-semibold text-brand-700">View & apply →</span>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <EmptyState message="No opportunities available at this time." />
+      )
+    }
+  </section>
+</BaseLayout>

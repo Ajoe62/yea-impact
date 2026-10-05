@@ -1,0 +1,68 @@
+---
+import { actions, isInputError } from 'astro:actions';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import Notice from '../../components/Notice.astro';
+import { formatDate } from '../../lib/format';
+
+const { id } = Astro.params;
+const { supabase, user } = Astro.locals;
+if (!supabase || !id) return Astro.rewrite('/404');
+
+const { data: job } = await supabase
+  .from('jobs')
+  .select('id, title, company, description, deadline')
+  .eq('id', id)
+  .single();
+if (!job) return Astro.rewrite('/404');
+
+const result = Astro.getActionResult(actions.applyForJob);
+const fieldErrors = result?.error && isInputError(result.error) ? result.error.fields : {};
+const formError = result?.error && !isInputError(result.error) ? result.error.message : undefined;
+---
+
+<BaseLayout title={job.title} description={job.description ?? undefined}>
+  <PageHero media="jobs-hero" alt="" eyebrow={job.company ?? 'Opportunity'} title={job.title} compact>
+    <p class="text-sm text-white/75">Application deadline: {formatDate(job.deadline)}</p>
+  </PageHero>
+
+  <div class="container-page grid gap-10 py-12 lg:grid-cols-[1fr_24rem] lg:py-16">
+    <div class="space-y-6">
+      <h2 class="text-2xl font-bold text-brand-900">About the role</h2>
+      <p class="text-lg leading-relaxed whitespace-pre-line text-ink/75">{job.description}</p>
+    </div>
+
+    <aside class="lg:sticky lg:top-24 lg:self-start">
+      <div class="card space-y-4 p-6">
+        <h2 class="text-lg font-bold text-brand-900">Apply for this job</h2>
+        {
+          result?.data ? (
+            <Notice tone="success">Application submitted successfully!</Notice>
+          ) : user ? (
+            <form method="POST" action={actions.applyForJob} class="space-y-4">
+              <input type="hidden" name="jobId" value={job.id} />
+              <div>
+                <label for="cvUrl" class="label">CV / résumé link</label>
+                <input id="cvUrl" name="cvUrl" type="url" required placeholder="https://" class="field" aria-invalid={fieldErrors.cvUrl ? 'true' : undefined} />
+                {fieldErrors.cvUrl && <p class="mt-1 text-sm text-red-700">{fieldErrors.cvUrl.join(' ')}</p>}
+              </div>
+              <div>
+                <label for="notes" class="label">Notes (optional)</label>
+                <textarea id="notes" name="notes" rows="4" class="field" />
+              </div>
+              {formError && <Notice tone="error">{formError}</Notice>}
+              <button class="btn-primary w-full">Submit application</button>
+            </form>
+          ) : (
+            <>
+              <p class="text-sm text-ink/70">Sign in to apply for this role.</p>
+              <a href={`/login?next=${encodeURIComponent(Astro.url.pathname)}`} class="btn-primary w-full">
+                Sign in to apply
+              </a>
+            </>
+          )
+        }
+      </div>
+    </aside>
+  </div>
+</BaseLayout>
