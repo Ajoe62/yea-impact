@@ -10,9 +10,9 @@ interface Props {
 
 const {
   title,
-  description = 'Empowering African youths through mindset reorientation, skills training, mentorship and industry connections.',
+  description = 'Inspiration for Impact. Empowering African youths through advocacy, mindset reorientation, skills training, mentorship and industry connections.',
 } = Astro.props;
-const fullTitle = title ? `${title} · YEA` : 'Dynamic Youth Empowerment & Advocacy (YEA)';
+const fullTitle = title ? `${title} · YEA` : 'YEA · Dynamic Youth Empowerment & Advocacy Foundation';
 ---
 
 <!doctype html>
@@ -28,14 +28,14 @@ const fullTitle = title ? `${title} · YEA` : 'Dynamic Youth Empowerment & Advoc
     <meta name="description" content={description} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
-    <meta name="theme-color" content="#126a45" />
+    <meta name="theme-color" content="#2b3190" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Inter:wght@400..700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:opsz,wght@9..40,400..700&display=swap"
     />
   </head>
   <body class="flex min-h-screen flex-col">

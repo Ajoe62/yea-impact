@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import Stamp from '../../components/Stamp.astro';
+
+export const prerender = true;
+
+const campaigns = [
+  {
+    href: '/campaigns/drug-abuse',
+    eyebrow: 'Drug abuse prevention',
+    title: 'Say no to drug abuse',
+    text: 'The facts about drugs commonly abused by young people, the warning signs to look for, and where to get confidential support.',
+    cta: 'Learn the facts',
+  },
+];
+---
+
+<BaseLayout title="Campaigns" description="YEA advocacy campaigns for young people, families and communities.">
+  <PageHero
+    eyebrow="Advocacy"
+    title="Our campaigns"
+    subtitle="We speak up on the issues that hold young people back, and give families and communities the facts to act."
+  />
+
+  <section class="container-page py-16 lg:py-20">
+    <ul class="grid gap-6 lg:grid-cols-2">
+      {
+        campaigns.map((c) => (
+          <li>
+            <a href={c.href} class="card card-accent group relative flex h-full flex-col gap-4 overflow-hidden p-8 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-900/10 md:p-10">
+              <div class="absolute -top-6 -right-6 w-36 rotate-6 opacity-90 max-sm:hidden">
+                <Stamp ring="Drug-free youth · Drug-free youth · " label="Choose life" />
+              </div>
+              <p class="eyebrow">{c.eyebrow}</p>
+              <h2 class="max-w-[12ch] text-5xl text-brand-700">{c.title}</h2>
+              <p class="max-w-md leading-relaxed text-ink/75">{c.text}</p>
+              <span class="mt-auto inline-flex items-center gap-2 pt-2 text-xs font-bold tracking-[0.14em] text-accent-500 uppercase">
+                {c.cta}
+                <svg class="size-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>

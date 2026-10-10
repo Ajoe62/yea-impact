@@ -41,7 +41,7 @@ const switchHref = `/login?mode=${isSignUp ? 'login' : 'signup'}${nextQuery}`;
         {
           user ? (
             <div class="space-y-5">
-              <h1 class="text-3xl font-bold text-brand-900">You’re signed in</h1>
+              <h1 class="text-5xl text-brand-700">You’re signed in</h1>
               <p class="text-ink/70">
                 Signed in as <strong>{user.email}</strong>.
               </p>
@@ -56,7 +56,7 @@ const switchHref = `/login?mode=${isSignUp ? 'login' : 'signup'}${nextQuery}`;
             <>
               <div class="space-y-2">
                 <p class="eyebrow">{isSignUp ? 'Join YEA' : 'Welcome back'}</p>
-                <h1 class="text-3xl font-bold text-brand-900 md:text-4xl">{isSignUp ? 'Create an account' : 'Sign in'}</h1>
+                <h1 class="text-5xl text-brand-700 md:text-6xl">{isSignUp ? 'Create an account' : 'Sign in'}</h1>
                 <p class="text-ink/70">
                   {isSignUp
                     ? 'Enrol in courses, request mentors, register for events and apply for jobs.'
@@ -73,7 +73,7 @@ const switchHref = `/login?mode=${isSignUp ? 'login' : 'signup'}${nextQuery}`;
                   <div>
                     <label for="email" class="label">Email</label>
                     <input id="email" name="email" type="email" autocomplete="email" required class="field" aria-invalid={fieldErrors.email ? 'true' : undefined} />
-                    {fieldErrors.email && <p class="mt-1 text-sm text-red-700">{fieldErrors.email.join(' ')}</p>}
+                    {fieldErrors.email && <p class="mt-1 text-sm text-accent-600">{fieldErrors.email.join(' ')}</p>}
                   </div>
                   <div>
                     <label for="password" class="label">Password</label>
@@ -87,7 +87,7 @@ const switchHref = `/login?mode=${isSignUp ? 'login' : 'signup'}${nextQuery}`;
                       class="field"
                       aria-invalid={fieldErrors.password ? 'true' : undefined}
                     />
-                    {fieldErrors.password && <p class="mt-1 text-sm text-red-700">{fieldErrors.password.join(' ')}</p>}
+                    {fieldErrors.password && <p class="mt-1 text-sm text-accent-600">{fieldErrors.password.join(' ')}</p>}
                   </div>
                   {formError && <Notice tone="error">{formError}</Notice>}
                   <button class="btn-primary w-full py-3">{isSignUp ? 'Create account' : 'Sign in'}</button>

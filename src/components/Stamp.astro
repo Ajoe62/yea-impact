@@ -1,0 +1,87 @@
+---
+/**
+ * Circular rubber-stamp seal from the campaign posters: text running round a
+ * ring, with a tilted banner across the middle. The ring turns slowly unless
+ * the visitor asks for reduced motion.
+ */
+interface Props {
+  /** Text around the ring; repeated to fill it. */
+  ring: string;
+  /** Text on the centre banner. */
+  label: string;
+  /** 'light' for white backgrounds (red seal), 'dark' for navy (blush seal). */
+  tone?: 'light' | 'dark';
+  class?: string;
+}
+
+const { ring, label, tone = 'light', class: className } = Astro.props;
+const id = `stamp-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<div class:list={['stamp', tone === 'dark' ? 'text-blush' : 'text-accent-500', className]} aria-hidden="true">
+  <svg viewBox="0 0 200 200" class="stamp-ring">
+    <defs>
+      <path id={id} d="M100,100 m-74,0 a74,74 0 1,1 148,0 a74,74 0 1,1 -148,0" />
+    </defs>
+    <circle cx="100" cy="100" r="96" fill="none" stroke="currentColor" stroke-width="5" />
+    <circle cx="100" cy="100" r="58" fill="none" stroke="currentColor" stroke-width="3" />
+    <text class="stamp-text" fill="currentColor" font-size="19" letter-spacing="3.2">
+      <textPath href={`#${id}`} textLength="460">{ring}</textPath>
+    </text>
+  </svg>
+  <span class="stamp-label">{label}</span>
+</div>
+
+<style>
+  .stamp {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+  }
+  .stamp-ring {
+    width: 100%;
+    height: 100%;
+  }
+  .stamp-text {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+  }
+  .stamp-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    padding: 0.3em 0.8em;
+    transform: translate(-50%, -50%) rotate(-12deg);
+    background: currentColor;
+    font-family: var(--font-display);
+    font-size: clamp(0.85rem, 1.5vw, 1.15rem);
+    line-height: 1.1;
+    letter-spacing: 0.06em;
+    text-align: center;
+    text-transform: uppercase;
+    /* A "\n" in the label breaks the banner onto two lines. */
+    white-space: pre-line;
+    box-shadow: 0 6px 16px -8px rgb(0 0 0 / 0.4);
+  }
+  /* Text inside the banner takes the opposite colour. */
+  .text-accent-500 .stamp-label {
+    background: var(--color-accent-500);
+    color: #fff;
+  }
+  .text-blush .stamp-label {
+    background: var(--color-blush);
+    color: var(--color-brand-800);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .stamp-ring {
+      animation: stamp-turn 40s linear infinite;
+    }
+  }
+  @keyframes stamp-turn {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

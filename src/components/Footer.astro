@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
-import logo from '../assets/images/logo.png';
+import logo from '../assets/images/logo-wordmark.png';
+import { CAC_NUMBER, CONTACT_EMAIL, CONTACT_HREF, ORG_NAME, SIGNUP_HREF } from '../lib/site';
 
 const year = new Date().getFullYear();
 const groups = [
@@ -10,6 +11,7 @@ const groups = [
       { href: '/programs', label: 'Programs' },
       { href: '/courses', label: 'Courses' },
       { href: '/mentorship', label: 'Mentorship' },
+      { href: SIGNUP_HREF, label: 'Join YEA' },
     ],
   },
   {
@@ -17,32 +19,38 @@ const groups = [
     links: [
       { href: '/events', label: 'Events' },
       { href: '/jobs', label: 'Jobs' },
-      { href: '/login', label: 'Create an account' },
+      { href: '/campaigns', label: 'Campaigns' },
+      { href: '/campaigns/drug-abuse', label: 'Say no to drug abuse' },
     ],
   },
 ];
 ---
 
-<footer class="mt-auto bg-brand-950 text-white/70">
-  <div class="container-page grid gap-10 py-14 md:grid-cols-[2fr_1fr_1fr]">
-    <div class="max-w-sm space-y-3">
-      <div class="flex items-center gap-4">
-        <Image src={logo} alt="" class="size-20 rounded-full" />
-        <p class="font-display text-xl leading-tight font-bold text-white">Dynamic Youth Empowerment &amp; Advocacy</p>
-      </div>
+<footer class="stripe-top relative mt-auto overflow-hidden bg-brand-700 text-white/75">
+  <div class="slash-right opacity-60 max-md:hidden" aria-hidden="true"></div>
+
+  <div class="container-page relative grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr] lg:py-20">
+    <div class="max-w-sm space-y-5">
+      <a href="/" class="inline-block rounded-2xl bg-white p-3 shadow-lg shadow-black/10" aria-label="YEA home">
+        <Image src={logo} alt="" densities={[1, 2]} height={56} class="h-14 w-auto" />
+      </a>
       <p class="text-sm leading-relaxed">
-        Mindset reorientation, skills training, mentorship and industry connections for
-        African youths aged 12 to 40.
+        Advocating for young people by empowering them to actualise their potential, through inspiration, mentorship and
+        skills for African youths aged 12 to 40.
+      </p>
+      <p class="font-display text-4xl leading-[0.95] tracking-wide uppercase">
+        <span class="text-white">Inspiration</span><br /><span class="text-blush">for Impact</span>
       </p>
     </div>
+
     {
       groups.map((g) => (
         <div>
-          <p class="mb-3 text-sm font-semibold text-white">{g.title}</p>
-          <ul class="space-y-2 text-sm">
+          <p class="mb-4 text-xs font-bold tracking-[0.2em] text-blush uppercase">{g.title}</p>
+          <ul class="space-y-2.5 text-sm">
             {g.links.map((l) => (
               <li>
-                <a href={l.href} class="hover:text-sun-300">
+                <a href={l.href} class="transition-colors hover:text-white">
                   {l.label}
                 </a>
               </li>
@@ -51,8 +59,21 @@ const groups = [
         </div>
       ))
     }
+
+    <div class="space-y-3">
+      <p class="text-xs font-bold tracking-[0.2em] text-blush uppercase">Talk to us</p>
+      <p class="text-sm">Help is available. Recovery is possible. Every message is confidential.</p>
+      <a href={CONTACT_HREF} class="block text-lg font-bold break-all text-white underline decoration-accent-500 decoration-2 underline-offset-4 hover:decoration-white">
+        {CONTACT_EMAIL}
+      </a>
+      <a href={CONTACT_HREF} class="btn-primary mt-2">Reach out to us</a>
+    </div>
   </div>
-  <div class="border-t border-white/10">
-    <p class="container-page py-5 text-xs">© {year} Dynamic Youth Empowerment &amp; Advocacy. All rights reserved.</p>
+
+  <div class="relative border-t border-white/15 bg-brand-800/60">
+    <div class="container-page flex flex-col gap-2 py-5 text-xs sm:flex-row sm:items-center sm:justify-between">
+      <p>© {year} {ORG_NAME}. All rights reserved.</p>
+      <p>Registered with CAC · {CAC_NUMBER}</p>
+    </div>
   </div>
 </footer>

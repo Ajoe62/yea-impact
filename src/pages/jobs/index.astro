@@ -27,7 +27,7 @@ const { data: jobs } = supabase
             <li>
               <a href={`/jobs/${job.id}`} class="card group flex h-full flex-col gap-2 p-6 transition hover:shadow-md">
                 <p class="text-sm font-medium text-brand-600">{job.company}</p>
-                <h2 class="text-lg font-bold text-brand-900 group-hover:text-brand-700">{job.title}</h2>
+                <h2 class="card-title text-lg text-brand-800 group-hover:text-brand-700">{job.title}</h2>
                 <p class="line-clamp-3 flex-1 text-sm leading-relaxed text-ink/70">{job.description}</p>
                 <div class="mt-2 flex items-center justify-between text-sm">
                   <span class="text-ink/60">Apply by {formatDate(job.deadline)}</span>

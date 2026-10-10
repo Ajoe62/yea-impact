@@ -24,11 +24,11 @@ const { data: programs } = supabase
         <ol class="grid gap-5 md:grid-cols-2">
           {programs.map((p, i) => (
             <li id={p.slug ?? undefined} class="card flex gap-5 p-6 md:p-8">
-              <span class="font-display text-3xl font-extrabold text-sun-500" aria-hidden="true">
+              <span class="font-display text-4xl text-accent-500" aria-hidden="true">
                 {String(i + 1).padStart(2, '0')}
               </span>
               <div class="space-y-2">
-                <h2 class="text-xl font-bold text-brand-900">{p.name}</h2>
+                <h2 class="card-title text-xl text-brand-800">{p.name}</h2>
                 <p class="leading-relaxed text-ink/70">{p.description}</p>
               </div>
             </li>

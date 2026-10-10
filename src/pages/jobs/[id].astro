@@ -28,13 +28,13 @@ const formError = result?.error && !isInputError(result.error) ? result.error.me
 
   <div class="container-page grid gap-10 py-12 lg:grid-cols-[1fr_24rem] lg:py-16">
     <div class="space-y-6">
-      <h2 class="text-2xl font-bold text-brand-900">About the role</h2>
+      <h2 class="text-3xl text-brand-700 md:text-4xl">About the role</h2>
       <p class="text-lg leading-relaxed whitespace-pre-line text-ink/75">{job.description}</p>
     </div>
 
     <aside class="lg:sticky lg:top-24 lg:self-start">
       <div class="card space-y-4 p-6">
-        <h2 class="text-lg font-bold text-brand-900">Apply for this job</h2>
+        <h2 class="card-title text-lg text-brand-800">Apply for this job</h2>
         {
           result?.data ? (
             <Notice tone="success">Application submitted successfully!</Notice>
@@ -44,7 +44,7 @@ const formError = result?.error && !isInputError(result.error) ? result.error.me
               <div>
                 <label for="cvUrl" class="label">CV / résumé link</label>
                 <input id="cvUrl" name="cvUrl" type="url" required placeholder="https://" class="field" aria-invalid={fieldErrors.cvUrl ? 'true' : undefined} />
-                {fieldErrors.cvUrl && <p class="mt-1 text-sm text-red-700">{fieldErrors.cvUrl.join(' ')}</p>}
+                {fieldErrors.cvUrl && <p class="mt-1 text-sm text-accent-600">{fieldErrors.cvUrl.join(' ')}</p>}
               </div>
               <div>
                 <label for="notes" class="label">Notes (optional)</label>

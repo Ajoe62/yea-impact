@@ -38,11 +38,11 @@ const initials = (name: string) =>
             <li>
               <a href={`/mentorship/${mentor.id}`} class="card group flex h-full flex-col gap-4 p-6 transition hover:shadow-md">
                 <div class="flex items-center gap-4">
-                  <span class="flex size-14 shrink-0 items-center justify-center rounded-full bg-brand-100 font-display text-lg font-bold text-brand-800">
+                  <span class="flex size-14 shrink-0 items-center justify-center rounded-full bg-brand-100 font-display text-xl text-brand-700">
                     {initials(mentor.name)}
                   </span>
                   <div>
-                    <h2 class="font-bold text-brand-900 group-hover:text-brand-700">{mentor.name}</h2>
+                    <h2 class="card-title text-brand-800 group-hover:text-brand-700">{mentor.name}</h2>
                     <p class="text-sm text-brand-600">{mentor.expertise}</p>
                   </div>
                 </div>

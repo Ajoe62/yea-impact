@@ -1,0 +1,56 @@
+---
+/**
+ * YouTube video that loads YouTube only when played: a thumbnail with a play
+ * button that swaps itself for the privacy-enhanced player on click. Without
+ * JavaScript the button is a plain link to the video on YouTube.
+ */
+interface Props {
+  /** The video ID, e.g. HTimpU4hs6E from https://youtu.be/HTimpU4hs6E. */
+  id: string;
+  /** Video title, for the play button label and the iframe title. */
+  title: string;
+}
+
+const { id, title } = Astro.props;
+---
+
+<div class="youtube relative h-full w-full bg-brand-950" data-youtube={id} data-title={title}>
+  <a
+    href={`https://www.youtube.com/watch?v=${id}`}
+    class="group absolute inset-0 flex items-center justify-center"
+    aria-label={`Play video: ${title}`}
+    data-youtube-play
+  >
+    <img
+      src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      class="absolute inset-0 h-full w-full scale-[1.03] object-cover transition duration-500 group-hover:scale-[1.06]"
+    />
+    <span class="absolute inset-0 bg-brand-950/30 transition group-hover:bg-brand-950/15" aria-hidden="true"></span>
+    <span
+      class="relative flex size-20 items-center justify-center rounded-full bg-accent-500 text-white shadow-[0_12px_32px_-8px_rgb(208_58_47/0.9)] ring-8 ring-white/20 transition group-hover:scale-110 md:size-24"
+      aria-hidden="true"
+    >
+      <svg class="ml-1 size-9" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+    </span>
+  </a>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-youtube]').forEach((box) => {
+    box.querySelector('[data-youtube-play]')?.addEventListener('click', (event) => {
+      event.preventDefault();
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${box.dataset.youtube}?autoplay=1&rel=0`;
+      iframe.title = box.dataset.title ?? 'YouTube video';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.allowFullscreen = true;
+      iframe.className = 'absolute inset-0 h-full w-full';
+      box.replaceChildren(iframe);
+      iframe.focus();
+    });
+  });
+</script>

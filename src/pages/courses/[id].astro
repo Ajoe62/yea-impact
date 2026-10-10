@@ -38,13 +38,13 @@ const error = result?.error && (isInputError(result.error) ? 'Something went wro
       {course.description && <p class="text-lg leading-relaxed text-ink/75">{course.description}</p>}
 
       <section class="space-y-4">
-        <h2 class="text-2xl font-bold text-brand-900">Modules</h2>
+        <h2 class="text-3xl text-brand-700 md:text-4xl">Modules</h2>
         {
           modules && modules.length > 0 ? (
             <ol class="space-y-3">
               {modules.map((m) => (
                 <li class="card flex items-center gap-4 p-4">
-                  <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-100 font-display font-bold text-brand-800">
+                  <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-100 font-display text-lg text-brand-700">
                     {m.module_number}
                   </span>
                   <div class="flex-1">
@@ -67,7 +67,7 @@ const error = result?.error && (isInputError(result.error) ? 'Something went wro
 
     <aside class="lg:sticky lg:top-24 lg:self-start">
       <div class="card space-y-4 p-6">
-        <h2 class="text-lg font-bold text-brand-900">Enrol</h2>
+        <h2 class="card-title text-lg text-brand-800">Enrol</h2>
         {
           result?.data ? (
             <Notice tone="success">You are enrolled in this course!</Notice>
