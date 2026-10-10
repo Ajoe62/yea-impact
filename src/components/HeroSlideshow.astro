@@ -1,32 +1,31 @@
 ---
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
+import Stamp from './Stamp.astro';
 import type { VideoSource } from '../lib/media';
 
 /**
  * Full-screen hero with a looping, cross-fading background slideshow: every
- * video clip in order, then every photo, then round again. With no media, or
- * for visitors who ask for reduced motion, only the brand gradient shows.
- * The default slot renders under the buttons (e.g. a row of stats).
+ * photo in order, then every video clip, then round again. With no media, or
+ * for visitors who ask for reduced motion, only the brand colour shows.
+ * Deliberately text-light so the photos carry it: just the organisation name,
+ * the turning seal and the calls to action, low on the left.
  */
 interface Props {
-  /** MP4 URLs, or per-clip source lists (e.g. a .webm and an .mp4), in play order. */
+  /** MP4 URLs, or per-clip source lists (e.g. a .webm and an .mp4), played after the photos. */
   clips?: (string | VideoSource[])[];
-  /** Photos shown after the clips, in order. */
+  /** Photos shown first, in order. */
   images?: ImageMetadata[];
   eyebrow?: string;
-  /** Trusted HTML: wrap one word in <em> to highlight it. */
-  headline: string;
-  lead?: string;
-  buttons?: { label: string; href: string; variant?: 'accent' | 'ghost' }[];
+  buttons?: { label: string; href: string; variant?: 'primary' | 'ghost' }[];
   class?: string;
 }
 
-const { clips = [], images = [], eyebrow, headline, lead, buttons = [], class: className } = Astro.props;
+const { clips = [], images = [], eyebrow, buttons = [], class: className } = Astro.props;
 
 const videoSlides = clips.map((clip) => (typeof clip === 'string' ? [{ src: clip, type: 'video/mp4' }] : clip));
 const hasSlides = videoSlides.length + images.length > 0;
-const firstIsImage = videoSlides.length === 0;
+const firstIsVideo = images.length === 0;
 
 // Never upscale: only ask for widths the source file can provide.
 const imageWidths = (image: ImageMetadata) => {
@@ -39,17 +38,8 @@ const imageWidths = (image: ImageMetadata) => {
   {
     hasSlides && (
       <div class="hero-slides" aria-hidden="true">
-        {videoSlides.map((sources, i) => (
-          <div class:list={['hero-slide', { 'is-active': i === 0 }]} data-slide>
-            <video muted playsinline autoplay={i === 0} preload={i === 0 ? 'auto' : 'none'}>
-              {sources.map((s) => (
-                <source src={s.src} type={s.type} />
-              ))}
-            </video>
-          </div>
-        ))}
         {images.map((image, i) => {
-          const eager = firstIsImage && i === 0;
+          const eager = i === 0;
           return (
             <div class:list={['hero-slide', { 'is-active': eager }]} data-slide>
               <Image
@@ -66,30 +56,34 @@ const imageWidths = (image: ImageMetadata) => {
             </div>
           );
         })}
+        {videoSlides.map((sources, i) => (
+          <div class:list={['hero-slide', { 'is-active': firstIsVideo && i === 0 }]} data-slide>
+            <video muted playsinline autoplay={firstIsVideo && i === 0} preload={firstIsVideo && i === 0 ? 'auto' : 'none'}>
+              {sources.map((s) => (
+                <source src={s.src} type={s.type} />
+              ))}
+            </video>
+          </div>
+        ))}
       </div>
     )
   }
   <div class="hero-vignette" aria-hidden="true"></div>
+  <div class="hero-slash" aria-hidden="true"></div>
+  <div class="hero-stamp">
+    <Stamp ring="Inspiration · Integrity · Impact · " label={'Inspiration\nfor Impact'} tone="dark" />
+  </div>
 
   <div class="hero-content container-page">
-    {eyebrow && <p class="hero-eyebrow hero-rise" style="--rise-i: 0">{eyebrow}</p>}
-    <h1 class="hero-rise" style="--rise-i: 1" set:html={headline} />
-    {lead && <p class="hero-lead hero-rise" style="--rise-i: 2">{lead}</p>}
+    {eyebrow && <p class="hero-eyebrow eyebrow eyebrow-on-dark hero-rise" style="--rise-i: 0">{eyebrow}</p>}
     {
       buttons.length > 0 && (
-        <div class="hero-buttons hero-rise" style="--rise-i: 3">
+        <div class="hero-buttons hero-rise" style="--rise-i: 1">
           {buttons.map((b, i) => (
-            <a href={b.href} class:list={[(b.variant ?? (i === 0 ? 'accent' : 'ghost')) === 'accent' ? 'btn-accent' : 'btn-ghost', 'px-6 py-3 text-base']}>
+            <a href={b.href} class:list={[(b.variant ?? (i === 0 ? 'primary' : 'ghost')) === 'primary' ? 'btn-primary' : 'btn-ghost', 'px-7 py-3.5']}>
               {b.label}
             </a>
           ))}
-        </div>
-      )
-    }
-    {
-      Astro.slots.has('default') && (
-        <div class="hero-rise" style="--rise-i: 4">
-          <slot />
         </div>
       )
     }
@@ -122,10 +116,12 @@ const imageWidths = (image: ImageMetadata) => {
     overflow: hidden;
     isolation: isolate;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     color: #fff;
     /* Shows before the first frame loads, and on its own under reduced motion. */
-    background: radial-gradient(ellipse at 30% 40%, var(--color-brand-700) 0%, var(--color-brand-950) 70%);
+    background: var(--color-brand-700);
+    /* The poster's red band under the navy block. */
+    border-bottom: 6px solid var(--color-accent-500);
   }
 
   .hero-slides {
@@ -177,83 +173,69 @@ const imageWidths = (image: ImageMetadata) => {
   }
 
   /*
-   * A near-neutral shade rather than a brand-green wash, so the photos keep
-   * their true colours: dark behind the headline on the left, clear on the
-   * right, and a soft floor under the stats.
+   * Only a soft navy floor behind the name and buttons, so the photos stay
+   * clear across the rest of the frame.
    */
   .hero-vignette {
     position: absolute;
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    background:
-      linear-gradient(
-        to right,
-        rgb(4 18 13 / 0.9) 0%,
-        rgb(4 18 13 / 0.76) 30%,
-        rgb(4 18 13 / 0.34) 56%,
-        rgb(4 18 13 / 0.06) 82%,
-        rgb(4 18 13 / 0) 100%
-      ),
-      linear-gradient(to top, rgb(4 18 13 / 0.6) 0%, rgb(4 18 13 / 0) 32%),
-      linear-gradient(to bottom, rgb(4 18 13 / 0.3) 0%, rgb(4 18 13 / 0) 18%);
+    background: linear-gradient(to top, rgb(17 20 58 / 0.85) 0%, rgb(17 20 58 / 0.45) 30%, rgb(17 20 58 / 0) 55%);
   }
 
-  /* On phones the text spans the whole photo, so shade it evenly. */
+  /* Diagonal red and translucent slashes along the right edge (poster 1 header). */
+  .hero-slash {
+    position: absolute;
+    inset: 0 0 0 auto;
+    z-index: 1;
+    width: min(22vw, 18rem);
+    pointer-events: none;
+    background:
+      linear-gradient(to top left, var(--color-accent-500) 0 50%, transparent calc(50% + 1px)) bottom right / 54% 46% no-repeat,
+      linear-gradient(to top left, rgb(43 49 144 / 0.7) 0 50%, transparent calc(50% + 1px)) bottom right / 100% 72% no-repeat;
+  }
+
+  .hero-stamp {
+    position: absolute;
+    top: 2.5rem;
+    right: 3rem;
+    z-index: 2;
+    width: 11rem;
+    padding: 0.5rem;
+    border-radius: 999px;
+    /* Keeps the blush seal legible over bright skies. */
+    background: rgb(17 20 58 / 0.55);
+    backdrop-filter: blur(4px);
+  }
+
   @media (max-width: 767px) {
-    .hero-vignette {
-      background:
-        linear-gradient(to top, rgb(4 18 13 / 0.85) 0%, rgb(4 18 13 / 0.55) 55%, rgb(4 18 13 / 0.45) 100%);
+    .hero-slash {
+      width: 24vw;
+    }
+    .hero-stamp {
+      top: 1.25rem;
+      right: 1.25rem;
+      width: 6.5rem;
     }
   }
 
-  /* Left-aligned at every width: the vignette is darkest on the left. */
+  /* Low on the left, over the navy floor. */
   .hero-content {
     position: relative;
     z-index: 2;
-    padding-block: 4rem;
-    text-align: left;
+    padding-block: 3rem 3.5rem;
   }
 
   .hero-eyebrow {
-    margin-bottom: 1.25rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--color-sun-300);
-  }
-
-  .hero h1 {
-    max-width: 18ch;
-    font-size: clamp(2.5rem, 5vw, 4rem);
-    font-weight: 800;
-    line-height: 1.05;
-    letter-spacing: -0.01em;
-    text-shadow:
-      0 2px 22px rgb(0 0 0 / 0.55),
-      0 1px 3px rgb(0 0 0 / 0.5);
-  }
-
-  .hero h1 :global(em) {
-    font-style: italic;
-    color: var(--color-sun-300);
-  }
-
-  .hero-lead {
-    max-width: 46ch;
-    margin-top: 1.5rem;
-    font-size: 1.14rem;
-    line-height: 1.6;
-    color: rgb(255 255 255 / 0.85);
-    text-shadow: 0 1px 12px rgb(0 0 0 / 0.4);
+    text-shadow: 0 1px 10px rgb(0 0 0 / 0.5);
   }
 
   .hero-buttons {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
-    margin-top: 2.5rem;
+    margin-top: 1.25rem;
   }
 
   .hero-sound {
@@ -267,7 +249,7 @@ const imageWidths = (image: ImageMetadata) => {
     padding: 0.55rem 1.05rem 0.55rem 0.85rem;
     border: 1px solid rgb(255 255 255 / 0.35);
     border-radius: 999px;
-    background: rgb(7 39 28 / 0.55);
+    background: rgb(28 32 92 / 0.6);
     backdrop-filter: blur(6px);
     color: #fff;
     font-size: 0.85rem;
@@ -277,11 +259,11 @@ const imageWidths = (image: ImageMetadata) => {
   }
 
   .hero-sound:hover {
-    background: rgb(7 39 28 / 0.75);
+    background: rgb(28 32 92 / 0.85);
   }
 
   .hero-sound:focus-visible {
-    outline: 2px solid var(--color-sun-300);
+    outline: 2px solid var(--color-blush);
     outline-offset: 3px;
   }
 

@@ -29,13 +29,13 @@ const result = Astro.getActionResult(actions.registerForEvent);
 
   <div class="container-page grid gap-10 py-12 lg:grid-cols-[1fr_22rem] lg:py-16">
     <div class="space-y-6">
-      <h2 class="text-2xl font-bold text-brand-900">About this event</h2>
+      <h2 class="text-3xl text-brand-700 md:text-4xl">About this event</h2>
       <p class="text-lg leading-relaxed whitespace-pre-line text-ink/75">{event.description}</p>
     </div>
 
     <aside class="lg:sticky lg:top-24 lg:self-start">
       <div class="card space-y-4 p-6">
-        <h2 class="text-lg font-bold text-brand-900">Register</h2>
+        <h2 class="card-title text-lg text-brand-800">Register</h2>
         {
           result?.data ? (
             <div class="space-y-4">

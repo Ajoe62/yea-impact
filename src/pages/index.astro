@@ -1,10 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import MediaImage from '../components/media/MediaImage.astro';
-import MediaVideo from '../components/media/MediaVideo.astro';
 import HeroSlideshow from '../components/HeroSlideshow.astro';
 import ImageMarquee from '../components/ImageMarquee.astro';
+import Stamp from '../components/Stamp.astro';
+import YouTubeEmbed from '../components/YouTubeEmbed.astro';
 import { findVideoSequence, heroImages, type ImageSlot } from '../lib/media';
+import { CONTACT_HREF, SIGNUP_HREF } from '../lib/site';
 import subscribeClip from '../assets/videos/yea-subscribe.mp4?url';
 
 // The home page has no database content, so it is built once as static HTML.
@@ -18,6 +20,24 @@ const stats = [
   { value: '20M', label: 'Youths we aim to reach across Africa' },
   { value: '12–40', label: 'Ages we work with' },
   { value: '7', label: 'Core areas of impact' },
+];
+
+const values = [
+  {
+    title: 'Inspiration',
+    text: 'To influence young people to be better, and to believe that better is possible.',
+    icon: 'M12 3v2m0 14v2m9-9h-2M5 12H3m15.36-6.36-1.42 1.42M7.06 16.94l-1.42 1.42m12.72 0-1.42-1.42M7.06 7.06 5.64 5.64M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z',
+  },
+  {
+    title: 'Integrity',
+    text: 'To promote honesty among ourselves and others, in everything we do.',
+    icon: 'M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6l-8-3Zm-3.5 9 2.5 2.5 4.5-5',
+  },
+  {
+    title: 'Impact',
+    text: 'To affect lives positively, one young person and one community at a time.',
+    icon: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-4a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-4a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z',
+  },
 ];
 
 const offerings: { slot: ImageSlot; title: string; text: string; href: string; cta: string }[] = [
@@ -40,15 +60,21 @@ const offerings: { slot: ImageSlot; title: string; text: string; href: string; c
     title: 'Events',
     text: 'Register for workshops and gatherings, and check in with your personal QR code.',
     href: '/events',
-    cta: 'See upcoming events',
+    cta: 'See events',
   },
   {
     slot: 'home-jobs',
     title: 'Industry opportunities',
     text: 'Apply for jobs and placements with partners who are hiring young talent.',
     href: '/jobs',
-    cta: 'View opportunities',
+    cta: 'View jobs',
   },
+];
+
+const campaignFacts = [
+  { myth: '“One try won’t hurt.”', fact: 'Dependence can start sooner than you think.' },
+  { myth: '“It helps me cope.”', fact: 'It deepens anxiety, depression and isolation.' },
+  { myth: '“Cough syrup and tramadol are safe.”', fact: 'Misused, they cause addiction and overdose.' },
 ];
 
 const gallery: { slot: ImageSlot; className: string }[] = [
@@ -62,41 +88,55 @@ const gallery: { slot: ImageSlot; className: string }[] = [
 ---
 
 <BaseLayout>
-  <!-- Hero -->
+  <!-- Hero: photos first, with only the name, seal and calls to action -->
   <HeroSlideshow
     clips={clips}
     images={heroImages}
-    eyebrow="Dynamic Youth Empowerment & Advocacy"
-    headline="Unlocking the <em>potential</em> of Africa’s youth."
-    lead="Through advocacy, mindset reorientation and skills development, we help young Africans build a better future for themselves and their communities."
+    eyebrow="Dynamic Youth Empowerment & Advocacy Foundation"
     buttons={[
+      { label: 'Join YEA', href: SIGNUP_HREF },
       { label: 'Explore our programs', href: '/programs' },
-      { label: 'Find a mentor', href: '/mentorship' },
     ]}
-  >
-    <dl class="mt-10 grid max-w-3xl grid-cols-3 gap-4 border-t border-white/20 pt-6">
-      {
-        stats.map((s) => (
-          <div class="flex flex-col-reverse justify-end gap-1">
-            <dt class="text-xs text-white/70 sm:text-sm">{s.label}</dt>
-            <dd class="font-display text-3xl font-bold text-sun-300 sm:text-4xl">{s.value}</dd>
-          </div>
-        ))
-      }
-    </dl>
-  </HeroSlideshow>
+  />
+
+  <!-- Intro -->
+  <section class="bg-white">
+    <div class="container-page grid items-center gap-10 py-14 lg:grid-cols-[1.3fr_1fr] lg:gap-16 lg:py-16">
+      <div class="space-y-4">
+        <h1 class="text-4xl text-brand-700 md:text-5xl">Unlocking the <em>potential</em> of Africa’s youth</h1>
+        <p class="max-w-2xl text-lg leading-relaxed text-ink/75">
+          Through advocacy, mindset reorientation and skills development, we help young Africans build a better future
+          for themselves and their communities.
+        </p>
+      </div>
+      <dl class="grid grid-cols-3 gap-4 border-t-4 border-accent-500 pt-6 lg:border-t-0 lg:border-l-4 lg:pt-0 lg:pl-8">
+        {
+          stats.map((s) => (
+            <div class="flex flex-col-reverse justify-end gap-1">
+              <dt class="text-xs text-ink/65 sm:text-sm">{s.label}</dt>
+              <dd class="font-display text-4xl text-brand-700 sm:text-5xl">{s.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
 
   <!-- Scrolling photo strip -->
-  <ImageMarquee label="Photos from YEA programmes" alt="YEA community moment" class="bg-brand-950 py-10 md:py-14" />
+  <ImageMarquee label="Photos from YEA programmes" alt="YEA community moment" class="bg-brand-900 py-10 md:py-14" />
 
   <!-- Mission -->
-  <section class="container-page grid items-center gap-12 py-20 md:grid-cols-2 lg:gap-20 lg:py-28">
-    <div class="aspect-4/5 overflow-hidden rounded-3xl shadow-xl shadow-brand-900/10">
-      <MediaImage media="home-mission" alt="Youths learning together" sizes="(min-width: 768px) 50vw, 100vw" />
+  <section class="container-page grid items-center gap-14 py-20 md:grid-cols-2 lg:gap-24 lg:py-28">
+    <div class="relative">
+      <div class="absolute -right-4 -bottom-4 h-2/3 w-2/3 rounded-3xl bg-accent-500 md:-right-6 md:-bottom-6" aria-hidden="true"></div>
+      <div class="absolute -top-4 -left-4 size-24 rounded-2xl bg-brand-700 md:-top-6 md:-left-6" aria-hidden="true"></div>
+      <div class="relative aspect-4/5 overflow-hidden rounded-3xl shadow-2xl shadow-brand-900/20">
+        <MediaImage media="home-mission" alt="Youths learning together" sizes="(min-width: 768px) 50vw, 100vw" />
+      </div>
     </div>
-    <div class="space-y-5">
+    <div class="space-y-6">
       <p class="eyebrow">Our mission</p>
-      <h2 class="text-3xl font-bold text-brand-900 md:text-4xl">Engaged youths build thriving societies.</h2>
+      <h2 class="text-5xl text-brand-700 md:text-6xl">Engaged youths build <em>thriving</em> societies</h2>
       <p class="text-lg leading-relaxed text-ink/75">
         Dynamic Youth Empowerment &amp; Advocacy (YEA) is a non-governmental organisation dedicated to empowering African youths between
         the ages of 12 and 40. We believe that many of our societies suffer from social decadence because youths are
@@ -106,21 +146,76 @@ const gallery: { slot: ImageSlot; className: string }[] = [
         Through advocacy, mindset reorientation and skills development, we aim to impact 20 million youths across
         Africa.
       </p>
-      <a href="/programs" class="btn-primary mt-2">Our areas of impact</a>
+      <div class="flex flex-wrap gap-3 pt-2">
+        <a href="/programs" class="btn-secondary">Our areas of impact</a>
+        <a href={SIGNUP_HREF} class="btn-outline">Join the movement</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vision, mission and values -->
+  <section class="relative overflow-hidden bg-mist py-20 lg:py-28">
+    <div class="corner-tr opacity-90 max-md:hidden" aria-hidden="true"></div>
+    <div class="container-page relative space-y-14">
+      <div class="max-w-2xl space-y-4">
+        <p class="eyebrow">Who we are</p>
+        <h2 class="text-5xl text-brand-700 md:text-6xl">Inspiration for <em>impact</em></h2>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-2">
+        <article class="relative overflow-hidden rounded-3xl bg-brand-700 p-8 text-white md:p-10">
+          <p class="eyebrow eyebrow-on-dark">Our vision</p>
+          <p class="mt-5 text-2xl leading-snug font-semibold md:text-3xl">
+            To advocate for young people by empowering them to actualise their potential.
+          </p>
+          <span class="absolute right-6 bottom-2 font-display text-[7rem] leading-none text-white/8" aria-hidden="true">V</span>
+        </article>
+        <article class="relative overflow-hidden rounded-3xl bg-white p-8 ring-1 ring-brand-900/8 md:p-10">
+          <p class="eyebrow">Our mission</p>
+          <p class="mt-5 text-2xl leading-snug font-semibold text-brand-800 md:text-3xl">
+            We provide inspiration and a blueprint for African youths’ self-actualisation, through empowerment to reform
+            their lives.
+          </p>
+          <span class="absolute right-6 bottom-2 font-display text-[7rem] leading-none text-brand-700/6" aria-hidden="true">M</span>
+        </article>
+      </div>
+
+      <div>
+        <h3 class="mb-6 text-sm font-bold tracking-[0.2em] text-brand-700 uppercase">Our core values</h3>
+        <ol class="grid gap-6 md:grid-cols-3">
+          {
+            values.map((v, i) => (
+              <li class="card card-accent flex flex-col gap-4 p-7">
+                <div class="flex items-center justify-between">
+                  <span class="font-display text-5xl text-accent-500">{String(i + 1).padStart(2, '0')}</span>
+                  <svg class="size-9 text-brand-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d={v.icon} />
+                  </svg>
+                </div>
+                <h4 class="font-display text-3xl tracking-wide text-brand-700 uppercase">{v.title}</h4>
+                <p class="leading-relaxed text-ink/70">{v.text}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
     </div>
   </section>
 
   <!-- What we offer -->
-  <section class="bg-brand-50/60 py-20 lg:py-28">
+  <section class="py-20 lg:py-28">
     <div class="container-page space-y-12">
-      <div class="max-w-2xl space-y-3">
-        <p class="eyebrow">What we offer</p>
-        <h2 class="text-3xl font-bold text-brand-900 md:text-4xl">Everything you need to grow, in one place.</h2>
+      <div class="flex flex-wrap items-end justify-between gap-6">
+        <div class="max-w-2xl space-y-4">
+          <p class="eyebrow">What we offer</p>
+          <h2 class="text-5xl text-brand-700 md:text-6xl">Everything you need to <em>grow</em></h2>
+        </div>
+        <a href={SIGNUP_HREF} class="btn-primary">Create a free account</a>
       </div>
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {
           offerings.map((o) => (
-            <a href={o.href} class="card group flex flex-col overflow-hidden transition hover:-translate-y-1 hover:shadow-lg">
+            <a href={o.href} class="card card-accent group flex flex-col overflow-hidden transition duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-brand-900/10">
               <div class="aspect-4/3 overflow-hidden">
                 <MediaImage
                   media={o.slot}
@@ -131,9 +226,12 @@ const gallery: { slot: ImageSlot; className: string }[] = [
                 />
               </div>
               <div class="flex flex-1 flex-col gap-2 p-6">
-                <h3 class="text-lg font-bold text-brand-900">{o.title}</h3>
+                <h3 class="text-lg text-brand-800">{o.title}</h3>
                 <p class="flex-1 text-sm leading-relaxed text-ink/70">{o.text}</p>
-                <span class="mt-2 text-sm font-semibold text-brand-700 group-hover:underline">{o.cta} →</span>
+                <span class="mt-3 inline-flex items-center gap-2 text-xs font-bold tracking-[0.14em] text-accent-500 uppercase">
+                  {o.cta}
+                  <svg class="size-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+                </span>
               </div>
             </a>
           ))
@@ -142,28 +240,70 @@ const gallery: { slot: ImageSlot; className: string }[] = [
     </div>
   </section>
 
+  <!-- Campaign: say no to drug abuse -->
+  <section class="relative overflow-hidden border-y border-brand-900/8 bg-white py-20 lg:py-28">
+    <div class="corner-bl" aria-hidden="true"></div>
+    <div class="container-page relative grid items-center gap-14 lg:grid-cols-[1.15fr_1fr]">
+      <div class="space-y-6">
+        <p class="eyebrow">Your future is worth more</p>
+        <h2 class="text-6xl leading-[0.92] text-brand-700 md:text-8xl">Say <em>no</em><br />to drug abuse</h2>
+        <p class="max-w-xl text-lg leading-relaxed text-ink/75">
+          Drugs promise an escape but deliver dependence. Our prevention campaign gives young people, parents and
+          schools the facts, the warning signs and a confidential place to ask for help.
+        </p>
+        <div class="flex flex-wrap items-center gap-3 pt-2">
+          <a href="/campaigns/drug-abuse" class="btn-primary">Learn the facts</a>
+          <a href={CONTACT_HREF} class="btn-outline">Get confidential support</a>
+        </div>
+      </div>
+
+      <div class="relative">
+        <div class="absolute -top-16 -right-4 hidden w-36 rotate-6 md:block">
+          <Stamp ring="Drug-free youth · Drug-free youth · " label="Choose life" />
+        </div>
+        <ul class="space-y-4">
+          {
+            campaignFacts.map((f) => (
+              <li class="rounded-2xl bg-mist p-5">
+                <p class="flex items-start gap-3">
+                  <span class="tag-red w-14 shrink-0 justify-center">Myth</span>
+                  <span class="font-semibold text-brand-700/80 italic">{f.myth}</span>
+                </p>
+                <p class="mt-2.5 flex items-start gap-3">
+                  <span class="tag-navy w-14 shrink-0 justify-center">Fact</span>
+                  <span class="font-semibold text-ink">{f.fact}</span>
+                </p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
   <!-- Story video -->
-  <section class="bg-brand-950 py-20 text-white lg:py-28">
-    <div class="container-page grid items-center gap-10 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
-      <div class="space-y-4">
-        <p class="text-xs font-semibold tracking-[0.18em] text-sun-300 uppercase">Our story</p>
-        <h2 class="text-3xl font-bold md:text-4xl">See the change we’re making together.</h2>
-        <p class="text-white/70">
+  <section class="on-dark relative overflow-hidden bg-brand-700 py-20 text-white lg:py-28">
+    <div class="slash-right opacity-70 max-lg:hidden" aria-hidden="true"></div>
+    <div class="container-page relative grid items-center gap-10 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
+      <div class="space-y-5">
+        <p class="eyebrow eyebrow-on-dark">Our story</p>
+        <h2 class="text-5xl md:text-6xl">See the change<br /><em>we’re making</em></h2>
+        <p class="text-white/80">
           Hear from the young people, mentors and partners behind YEA, and see what happens when youths are given the
           skills and support to thrive.
         </p>
       </div>
-      <div class="aspect-video overflow-hidden rounded-2xl ring-1 ring-white/10">
-        <MediaVideo media="home-story" mode="player" poster="home-video-poster" label="the YEA story" />
+      <div class="aspect-video overflow-hidden rounded-2xl shadow-2xl ring-4 shadow-black/30 ring-white/10">
+        <YouTubeEmbed id="HTimpU4hs6E" title="The YEA story" />
       </div>
     </div>
   </section>
 
   <!-- Gallery -->
   <section class="container-page space-y-10 py-20 lg:py-28">
-    <div class="max-w-2xl space-y-3">
+    <div class="max-w-2xl space-y-4">
       <p class="eyebrow">Community</p>
-      <h2 class="text-3xl font-bold text-brand-900 md:text-4xl">Moments from our community.</h2>
+      <h2 class="text-5xl text-brand-700 md:text-6xl">Moments from our <em>community</em></h2>
     </div>
     <div class="grid auto-rows-[9rem] grid-cols-2 gap-3 sm:auto-rows-[12rem] md:grid-cols-4 md:gap-4">
       {
@@ -178,14 +318,19 @@ const gallery: { slot: ImageSlot; className: string }[] = [
 
   <!-- Call to action -->
   <section class="container-page pb-20 lg:pb-28">
-    <div class="relative overflow-hidden rounded-3xl bg-brand-700 px-6 py-14 text-center text-white md:px-16">
-      <div class="absolute -top-24 -right-24 size-72 rounded-full bg-sun-400/25 blur-3xl" aria-hidden="true"></div>
-      <div class="relative mx-auto max-w-2xl space-y-5">
-        <h2 class="text-3xl font-bold md:text-4xl">Your future starts with one step.</h2>
-        <p class="text-white/80">Create a free account to enrol in courses, request a mentor, register for events and apply for jobs.</p>
-        <div class="flex flex-wrap justify-center gap-3">
-          <a href="/login?mode=signup" class="btn-accent px-6 py-3 text-base">Create an account</a>
-          <a href="/courses" class="btn-ghost px-6 py-3 text-base">Browse courses</a>
+    <div class="on-dark relative overflow-hidden rounded-3xl bg-brand-700 px-6 py-14 text-white md:px-14 md:py-16">
+      <div class="slash-right" aria-hidden="true"></div>
+      <div class="relative max-w-3xl space-y-8">
+        <div class="space-y-5">
+          <p class="eyebrow eyebrow-on-dark">Ready to grow?</p>
+          <h2 class="text-5xl md:text-7xl">Your future starts<br /><em>with one step</em></h2>
+          <p class="max-w-xl text-white/80">
+            Create a free account to enrol in courses, request a mentor, register for events and apply for jobs.
+          </p>
+        </div>
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <a href={SIGNUP_HREF} class="btn-primary px-8 py-4">Join YEA, it’s free</a>
+          <a href={CONTACT_HREF} class="btn-ghost px-8 py-4">Reach out to us</a>
         </div>
       </div>
     </div>

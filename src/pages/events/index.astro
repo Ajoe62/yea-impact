@@ -31,7 +31,7 @@ const { data: events } = supabase
                   <div class="flex size-16 shrink-0 flex-col items-center justify-center rounded-xl bg-brand-700 text-white">
                     {badge ? (
                       <>
-                        <span class="font-display text-2xl leading-none font-bold">{badge.day}</span>
+                        <span class="font-display text-2xl leading-none">{badge.day}</span>
                         <span class="text-xs tracking-wide uppercase">{badge.month}</span>
                       </>
                     ) : (
@@ -39,7 +39,7 @@ const { data: events } = supabase
                     )}
                   </div>
                   <div class="min-w-0 flex-1 space-y-1">
-                    <h2 class="text-lg font-bold text-brand-900 group-hover:text-brand-700">{event.title}</h2>
+                    <h2 class="card-title text-lg text-brand-800 group-hover:text-brand-700">{event.title}</h2>
                     <p class="text-sm text-ink/60">
                       {formatDateTime(event.event_date)}
                       {event.location && <> · {event.location}</>}

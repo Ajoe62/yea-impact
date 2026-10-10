@@ -29,7 +29,7 @@ if (registration && !registration.checked_in) {
       <div
         class:list={[
           'mx-auto flex size-16 items-center justify-center rounded-full',
-          valid ? 'bg-brand-100 text-brand-700' : 'bg-red-50 text-red-600',
+          valid ? 'bg-brand-100 text-brand-700' : 'bg-accent-50 text-accent-500',
         ]}
         aria-hidden="true"
       >
@@ -40,12 +40,12 @@ if (registration && !registration.checked_in) {
       {
         valid ? (
           <>
-            <h1 class="text-2xl font-bold text-brand-800">Check-in successful</h1>
+            <h1 class="text-4xl text-brand-700">Check-in successful</h1>
             <p class="text-ink/70">Welcome! Your attendance has been recorded.</p>
           </>
         ) : (
           <>
-            <h1 class="text-2xl font-bold text-red-700">Invalid or expired token</h1>
+            <h1 class="text-4xl text-accent-600">Invalid or expired token</h1>
             <p class="text-ink/70">Please make sure you scanned the correct QR code.</p>
           </>
         )

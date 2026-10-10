@@ -27,13 +27,13 @@ const result = Astro.getActionResult(actions.requestMentorship);
 
   <div class="container-page grid gap-10 py-12 lg:grid-cols-[1fr_24rem] lg:py-16">
     <div class="space-y-6">
-      <h2 class="text-2xl font-bold text-brand-900">About {name}</h2>
+      <h2 class="text-3xl text-brand-700 md:text-4xl">About {name}</h2>
       <p class="text-lg leading-relaxed whitespace-pre-line text-ink/75">{mentor.bio}</p>
     </div>
 
     <aside class="lg:sticky lg:top-24 lg:self-start">
       <div class="card space-y-4 p-6">
-        <h2 class="text-lg font-bold text-brand-900">Request mentorship</h2>
+        <h2 class="card-title text-lg text-brand-800">Request mentorship</h2>
         {
           result?.data ? (
             <Notice tone="success">Request submitted successfully!</Notice>
