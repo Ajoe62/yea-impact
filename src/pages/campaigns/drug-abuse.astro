@@ -134,7 +134,7 @@ const roles = [
   <!-- Know the facts -->
   <section class="relative overflow-hidden bg-white py-20 lg:py-24">
     <div class="container-page relative space-y-12">
-      <div class="flex flex-wrap items-center justify-between gap-8">
+      <div class="flex flex-wrap items-center justify-between gap-8 lg:flex-nowrap">
         <div class="max-w-3xl space-y-4">
           <p class="eyebrow">Your future is worth more</p>
           <h2 class="text-5xl text-brand-700 md:text-7xl">Say <em>no</em> to drug abuse</h2>
@@ -143,15 +143,16 @@ const roles = [
             {drugs.map((d) => <li class="chip">{d}</li>)}
           </ul>
         </div>
-        <div class="w-44 -rotate-6 max-md:hidden">
+        <!-- Only beside the copy: below lg it would wrap onto a row of its own. -->
+        <div class="w-44 shrink-0 -rotate-6 max-lg:hidden">
           <Stamp ring="Drug-free youth · Drug-free youth · " label="Choose life" />
         </div>
       </div>
 
-      <div class="grid gap-6 md:grid-cols-3">
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {
           columns.map((c) => (
-            <article class="rounded-2xl bg-mist p-7 md:p-8">
+            <article class="rounded-2xl bg-mist p-7 md:p-8 md:max-lg:last:col-span-2">
               <h3 class="font-display text-3xl tracking-wide text-brand-700 uppercase">{c.title}</h3>
               <ul class="mt-6 space-y-5">
                 {c.items.map((item) => (
@@ -192,13 +193,13 @@ const roles = [
   <section class="container-page pb-20 lg:pb-28">
     <div class="on-dark relative overflow-hidden rounded-3xl bg-brand-700 px-6 py-12 text-white md:px-14">
       <div class="slash-right opacity-80" style="width: min(30vw, 16rem)" aria-hidden="true"></div>
-      <div class="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+      <div class="relative flex flex-col gap-8 xl:flex-row xl:items-center xl:justify-between">
         <div class="space-y-3">
           <p class="eyebrow eyebrow-on-dark">Need support? It’s confidential</p>
-          <a href={CONTACT_HREF} class="block text-3xl font-bold break-all hover:underline md:text-5xl">{CONTACT_EMAIL}</a>
+          <a href={CONTACT_HREF} class="block text-xl font-bold wrap-anywhere hover:underline min-[360px]:text-2xl sm:text-3xl md:text-5xl">{CONTACT_EMAIL}</a>
           <p class="text-white/80">Help is available. Recovery is possible.</p>
         </div>
-        <a href={CONTACT_HREF} class="btn-primary shrink-0 px-8 py-4 lg:mr-40">Reach out to us</a>
+        <a href={CONTACT_HREF} class="btn-primary shrink-0 self-start px-8 py-4 xl:mr-40 xl:self-auto">Reach out to us</a>
       </div>
     </div>
   </section>

@@ -29,8 +29,9 @@ const groups = [
 <footer class="stripe-top relative mt-auto overflow-hidden bg-brand-700 text-white/75">
   <div class="slash-right opacity-60 max-md:hidden" aria-hidden="true"></div>
 
-  <div class="container-page relative grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr] lg:py-20">
-    <div class="max-w-sm space-y-5">
+  <!-- On phones the two link lists share a row; the brand and contact blocks span it. -->
+  <div class="container-page relative grid grid-cols-2 gap-x-6 gap-y-12 py-16 md:gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr] lg:py-20">
+    <div class="col-span-2 max-w-sm space-y-5 md:col-span-1">
       <a href="/" class="inline-block rounded-2xl bg-white p-3 shadow-lg shadow-black/10" aria-label="YEA home">
         <Image src={logo} alt="" densities={[1, 2]} height={56} class="h-14 w-auto" />
       </a>
@@ -60,7 +61,7 @@ const groups = [
       ))
     }
 
-    <div class="space-y-3">
+    <div class="col-span-2 space-y-3 md:col-span-1">
       <p class="text-xs font-bold tracking-[0.2em] text-blush uppercase">Talk to us</p>
       <p class="text-sm">Help is available. Recovery is possible. Every message is confidential.</p>
       <a href={CONTACT_HREF} class="block text-lg font-bold break-all text-white underline decoration-accent-500 decoration-2 underline-offset-4 hover:decoration-white">
