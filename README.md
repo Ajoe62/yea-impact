@@ -53,16 +53,16 @@ src/
 
 ## Database
 
-Create the tables in Supabase with **Row Level Security enabled** on each, with
-policies that let users read and change only their own rows. Add these composite
-**UNIQUE constraints** to prevent duplicates:
+Run [supabase/schema.sql](supabase/schema.sql) once in the Supabase SQL Editor.
+It creates the tables with **Row Level Security enabled** (users read and create
+only their own rows), the composite **UNIQUE constraints** that prevent
+duplicates, a `check_in` function for QR check-in, and the public `qr-codes`
+storage bucket. [supabase/seed.sql](supabase/seed.sql) adds optional sample content.
 
 - `enrollments`: `(user_id, course_id)`
 - `mentor_requests`: `(mentee_id, mentor_id)`
 - `event_registrations`: `(user_id, event_id)`
 - `applications`: `(job_id, applicant_id)`
-
-Also create a public storage bucket called `qr-codes` for event check-in QR codes.
 
 ## Scripts
 

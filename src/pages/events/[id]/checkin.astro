@@ -2,25 +2,17 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 
 /**
- * Opened by scanning a registration QR code. Validates the token against
- * `event_registrations` and marks the attendee as checked in.
+ * Opened by scanning a registration QR code. The `check_in` database function
+ * validates the token and marks the attendee as checked in. It runs past RLS,
+ * since the person scanning is usually not the person who registered.
  */
 const { id } = Astro.params;
 const token = Astro.url.searchParams.get('token');
 const supabase = Astro.locals.supabase;
 if (!supabase || !id || !token) return Astro.rewrite('/404');
 
-const { data: registration, error } = await supabase
-  .from('event_registrations')
-  .select('id, checked_in')
-  .eq('event_id', id)
-  .eq('token', token)
-  .single();
-
-const valid = Boolean(registration && !error);
-if (registration && !registration.checked_in) {
-  await supabase.from('event_registrations').update({ checked_in: true }).eq('id', registration.id);
-}
+const { data } = await supabase.rpc('check_in', { p_event_id: id, p_token: token });
+const valid = data === true;
 ---
 
 <BaseLayout title="Event check-in">
