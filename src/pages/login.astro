@@ -20,7 +20,13 @@ const user = Astro.locals.user;
 const isSignUp = signupResult ? true : loginResult ? false : params.get('mode') === 'signup';
 const result = isSignUp ? signupResult : loginResult;
 const fieldErrors = result?.error && isInputError(result.error) ? result.error.fields : {};
-const formError = result?.error && !isInputError(result.error) ? result.error.message : undefined;
+const confirmFailed = !result && params.get('confirm') === 'failed';
+const formError =
+  result?.error && !isInputError(result.error)
+    ? result.error.message
+    : confirmFailed
+      ? 'That confirmation link is invalid or has expired. Try signing in, or create your account again.'
+      : undefined;
 const needsConfirmation = signupResult?.data && !signupResult.data.signedIn;
 
 const nextQuery = next === '/' ? '' : `&next=${encodeURIComponent(next)}`;

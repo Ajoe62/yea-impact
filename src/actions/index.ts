@@ -51,7 +51,18 @@ export const server = {
     input: credentials,
     handler: async ({ email, password }, context) => {
       const supabase = requireSupabase(context);
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      // The confirmation link lands on /auth/confirm, which signs the user in and
+      // forwards them to `next`. This URL must be in Supabase's Redirect URLs list.
+      const origin = import.meta.env.PUBLIC_SITE_URL || context.url.origin;
+      const confirmUrl = new URL('/auth/confirm', origin);
+      const next = context.url.searchParams.get('next');
+      if (next) confirmUrl.searchParams.set('next', next);
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: confirmUrl.toString() },
+      });
       if (error) throw new ActionError({ code: 'BAD_REQUEST', message: error.message });
       // With email confirmation on, Supabase returns no session until the link is clicked.
       return { signedIn: Boolean(data.session) };

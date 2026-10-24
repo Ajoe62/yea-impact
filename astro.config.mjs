@@ -6,6 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 // Pages render on the server by default (they read from Supabase per request).
 // The home page opts into static prerendering with `export const prerender = true`.
 export default defineConfig({
+  site: 'https://yeaimpactfoundation.top',
   output: 'server',
   adapter: vercel(),
   vite: {

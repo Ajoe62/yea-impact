@@ -13,6 +13,8 @@ const {
   description = 'Inspiration for Impact. Empowering African youths through advocacy, mindset reorientation, skills training, mentorship and industry connections.',
 } = Astro.props;
 const fullTitle = title ? `${title} · YEA` : 'YEA · Dynamic Youth Empowerment & Advocacy Foundation';
+// Always points at the main domain, so search engines ignore *.vercel.app copies.
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
@@ -28,6 +30,8 @@ const fullTitle = title ? `${title} · YEA` : 'YEA · Dynamic Youth Empowerment 
     <meta name="description" content={description} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <link rel="canonical" href={canonicalUrl} />
     <meta name="theme-color" content="#2b3190" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/favicon.png" />

@@ -78,7 +78,9 @@ storage bucket. [supabase/seed.sql](supabase/seed.sql) adds optional sample cont
 Configured for [Vercel](https://vercel.com) with `@astrojs/vercel`. Import the
 repository in Vercel and set `PUBLIC_SUPABASE_URL` and
 `PUBLIC_SUPABASE_PUBLISHABLE_KEY` under **Project Settings → Environment
-Variables**. To host elsewhere, swap the adapter in `astro.config.mjs` (for
+Variables**, plus `PUBLIC_SITE_URL=https://yeaimpactfoundation.top` for
+Production. The production domain is also set as `site` in `astro.config.mjs`.
+To host elsewhere, swap the adapter in `astro.config.mjs` (for
 example `@astrojs/node`).
 
 ## License
