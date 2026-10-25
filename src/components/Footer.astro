@@ -74,7 +74,11 @@ const groups = [
   <div class="relative border-t border-white/15 bg-brand-800/60">
     <div class="container-page flex flex-col gap-2 py-5 text-xs sm:flex-row sm:items-center sm:justify-between">
       <p>© {year} {ORG_NAME}. All rights reserved.</p>
-      <p>Registered with CAC · {CAC_NUMBER}</p>
+      <p class="flex flex-wrap gap-x-4 gap-y-1">
+        <a href="/privacy" class="hover:text-white">Privacy Policy</a>
+        <a href="/terms" class="hover:text-white">Terms of Service</a>
+        <span>Registered with CAC · {CAC_NUMBER}</span>
+      </p>
     </div>
   </div>
 </footer>

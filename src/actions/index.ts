@@ -1,6 +1,6 @@
 import { ActionError, defineAction, type ActionAPIContext } from 'astro:actions';
 import { z } from 'astro/zod';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { AuthError, SupabaseClient } from '@supabase/supabase-js';
 import QRCode from 'qrcode';
 import { createSupabase, UNIQUE_VIOLATION } from '../lib/supabase';
 
@@ -29,32 +29,74 @@ function insertFailed(error: { code?: string; message: string }, duplicateMessag
   throw new ActionError({ code: 'BAD_REQUEST', message: error.message });
 }
 
-const credentials = z.object({
-  email: z.email('Enter a valid email address.'),
-  password: z.string().min(6, 'Password must be at least 6 characters.'),
-});
+/** Where auth emails link back to: the main domain in production, else this server. */
+function siteOrigin(context: ActionAPIContext): string {
+  return import.meta.env.PUBLIC_SITE_URL || context.url.origin;
+}
+
+/** Plain-language messages for the Supabase Auth errors people actually run into. */
+function authMessage(error: AuthError): string {
+  switch (error.code) {
+    case 'invalid_credentials':
+      return 'That email and password don’t match. Check them and try again, or reset your password.';
+    case 'user_already_exists':
+    case 'email_exists':
+      return 'An account with this email already exists. Sign in instead, or reset your password if you’ve forgotten it.';
+    case 'over_email_send_rate_limit':
+      return 'We’ve just sent you an email. Please wait a minute before asking for another one.';
+    case 'over_request_rate_limit':
+      return 'Too many attempts. Please wait a minute and try again.';
+    case 'weak_password':
+      return 'That password is too easy to guess. Use at least 8 characters, mixing letters and numbers.';
+    case 'same_password':
+      return 'Your new password must be different from your current one.';
+    case 'email_address_invalid':
+      return 'That email address can’t receive mail. Check it and try again.';
+    case 'signup_disabled':
+      return 'Registration is closed at the moment. Please contact us.';
+  }
+  // Supabase reports SMTP failures as a 500 with no specific code.
+  if (error.status === 500 && /email/i.test(error.message)) {
+    return 'We couldn’t send your email just now. Please try again in a few minutes, or contact us if it keeps happening.';
+  }
+  return error.message;
+}
+
+const email = z.email('Enter a valid email address.');
+const newPassword = z.string().min(8, 'Use at least 8 characters.').max(72, 'Use at most 72 characters.');
 
 export const server = {
   login: defineAction({
     accept: 'form',
-    input: credentials,
+    input: z.object({ email, password: z.string().min(1, 'Enter your password.') }),
     handler: async ({ email, password }, context) => {
       const supabase = requireSupabase(context);
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw new ActionError({ code: 'UNAUTHORIZED', message: error.message });
+      if (error?.code === 'email_not_confirmed') {
+        // Send a fresh link straight away, since the first one may be lost or expired.
+        await supabase.auth.resend({
+          type: 'signup',
+          email,
+          options: { emailRedirectTo: new URL('/auth/confirm', siteOrigin(context)).toString() },
+        });
+        throw new ActionError({
+          code: 'FORBIDDEN',
+          message: `Please confirm your email address first. We’ve sent a new confirmation link to ${email}. Check your inbox and spam folder.`,
+        });
+      }
+      if (error) throw new ActionError({ code: 'UNAUTHORIZED', message: authMessage(error) });
       return { signedIn: true };
     },
   }),
 
   signup: defineAction({
     accept: 'form',
-    input: credentials,
+    input: z.object({ email, password: newPassword }),
     handler: async ({ email, password }, context) => {
       const supabase = requireSupabase(context);
       // The confirmation link lands on /auth/confirm, which signs the user in and
       // forwards them to `next`. This URL must be in Supabase's Redirect URLs list.
-      const origin = import.meta.env.PUBLIC_SITE_URL || context.url.origin;
-      const confirmUrl = new URL('/auth/confirm', origin);
+      const confirmUrl = new URL('/auth/confirm', siteOrigin(context));
       const next = context.url.searchParams.get('next');
       if (next) confirmUrl.searchParams.set('next', next);
 
@@ -63,9 +105,63 @@ export const server = {
         password,
         options: { emailRedirectTo: confirmUrl.toString() },
       });
-      if (error) throw new ActionError({ code: 'BAD_REQUEST', message: error.message });
+      if (error) throw new ActionError({ code: 'BAD_REQUEST', message: authMessage(error) });
+      // For an email that is already registered and confirmed, Supabase returns a
+      // stand-in user with no identities (and sends nothing) rather than an error.
+      if (data.user && data.user.identities?.length === 0) {
+        throw new ActionError({
+          code: 'CONFLICT',
+          message: 'An account with this email already exists. Sign in instead, or reset your password if you’ve forgotten it.',
+        });
+      }
       // With email confirmation on, Supabase returns no session until the link is clicked.
-      return { signedIn: Boolean(data.session) };
+      return { signedIn: Boolean(data.session), email };
+    },
+  }),
+
+  resendConfirmation: defineAction({
+    accept: 'form',
+    input: z.object({ email }),
+    handler: async ({ email }, context) => {
+      const supabase = requireSupabase(context);
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: { emailRedirectTo: new URL('/auth/confirm', siteOrigin(context)).toString() },
+      });
+      if (error) throw new ActionError({ code: 'BAD_REQUEST', message: authMessage(error) });
+      return { sent: true, email };
+    },
+  }),
+
+  requestPasswordReset: defineAction({
+    accept: 'form',
+    input: z.object({ email }),
+    handler: async ({ email }, context) => {
+      const supabase = requireSupabase(context);
+      const redirectTo = new URL('/auth/confirm', siteOrigin(context));
+      redirectTo.searchParams.set('next', '/reset-password');
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: redirectTo.toString() });
+      // Unknown emails succeed silently, so this can't be used to find out who has an account.
+      if (error) throw new ActionError({ code: 'BAD_REQUEST', message: authMessage(error) });
+      return { sent: true, email };
+    },
+  }),
+
+  updatePassword: defineAction({
+    accept: 'form',
+    input: z
+      .object({ password: newPassword, confirmPassword: z.string() })
+      .refine((value) => value.password === value.confirmPassword, {
+        message: 'The passwords don’t match.',
+        path: ['confirmPassword'],
+      }),
+    handler: async ({ password }, context) => {
+      const supabase = requireSupabase(context);
+      await requireUser(supabase, 'Your reset link has expired. Please request a new one.');
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw new ActionError({ code: 'BAD_REQUEST', message: authMessage(error) });
+      return { updated: true };
     },
   }),
 
@@ -105,7 +201,7 @@ export const server = {
 
       // The QR code is a convenience: registration still succeeds if this part fails.
       try {
-        const origin = import.meta.env.PUBLIC_SITE_URL || context.url.origin;
+        const origin = siteOrigin(context);
         const png = await QRCode.toBuffer(`${origin}/events/${eventId}/checkin?token=${token}`, { width: 480, margin: 2 });
         const bucket = supabase.storage.from('qr-codes');
         const fileName = `${token}.png`;

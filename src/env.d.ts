@@ -3,7 +3,7 @@
 interface ImportMetaEnv {
   readonly PUBLIC_SUPABASE_URL: string;
   readonly PUBLIC_SUPABASE_PUBLISHABLE_KEY: string;
-  /** Optional. Overrides the site origin used in event QR codes. */
+  /** Optional. Overrides the site origin used in event QR codes and auth email links. */
   readonly PUBLIC_SITE_URL?: string;
 }
 

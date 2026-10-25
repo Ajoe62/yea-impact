@@ -18,8 +18,17 @@ security definer
 set search_path = ''
 as $$
 begin
+  -- Google sign-ins carry the person's name; email sign-ups fall back to the
+  -- part of the address before the @. Display only, never used for access.
   insert into public.profiles (id, display_name)
-  values (new.id, split_part(new.email, '@', 1));
+  values (
+    new.id,
+    coalesce(
+      nullif(trim(new.raw_user_meta_data ->> 'full_name'), ''),
+      nullif(trim(new.raw_user_meta_data ->> 'name'), ''),
+      split_part(new.email, '@', 1)
+    )
+  );
   return new;
 end;
 $$;
