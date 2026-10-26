@@ -75,6 +75,18 @@ const marqueeFiles = import.meta.glob<{ default: ImageMetadata }>(
   { eager: true },
 );
 
+/** Event photos: src/assets/images/events/<event-id>.jpg, named after the event's id in Supabase. */
+const eventFiles = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/images/events/*.{jpg,jpeg,png,webp,avif,JPG,JPEG,PNG,WEBP,AVIF}',
+  { eager: true },
+);
+
+/** Partner logos: every image in src/assets/images/partners/, in file-name order. */
+const partnerFiles = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/images/partners/*.{jpg,jpeg,png,webp,avif,JPG,JPEG,PNG,WEBP,AVIF}',
+  { eager: true },
+);
+
 const baseName = (path: string) => path.split('/').pop()!.replace(/\.[^.]+$/, '');
 const byName = (a: string, b: string) => a.localeCompare(b, undefined, { numeric: true });
 
@@ -87,6 +99,26 @@ export const heroImages: ImageMetadata[] = Object.keys(imageFiles)
 export const marqueeImages: ImageMetadata[] = Object.keys(marqueeFiles)
   .sort(byName)
   .map((path) => marqueeFiles[path].default);
+
+/** The photo dropped in for an event, or undefined if there isn't one. */
+export function findEventImage(eventId: string): ImageMetadata | undefined {
+  const match = Object.entries(eventFiles).find(([path]) => baseName(path).toLowerCase() === eventId.toLowerCase());
+  return match?.[1].default;
+}
+
+/**
+ * Partner logos with a name taken from the file name, so `01-united-bank-for-africa.png`
+ * is named "United Bank For Africa". A leading number only sets the order.
+ */
+export const partnerLogos: { image: ImageMetadata; name: string }[] = Object.keys(partnerFiles)
+  .sort(byName)
+  .map((path) => ({
+    image: partnerFiles[path].default,
+    name: baseName(path)
+      .replace(/^\d+[-_ ]*/, '')
+      .replace(/[-_]+/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase()),
+  }));
 
 /** The image dropped in for a slot, or undefined if there isn't one yet. */
 export function findImage(slot: ImageSlot): ImageMetadata | undefined {

@@ -43,6 +43,24 @@ the left, so prefer photos whose subject is on the right.
 Every photo in `src/assets/images/marquee/` scrolls across the page under the
 home hero, in file-name order. Add or remove files freely; any number works.
 
+## Event photos
+
+Put a photo for an event in `src/assets/images/events/`, named after the
+event's id: the last part of its address (`/events/<id>`), or the `id` column
+of the `events` table in Supabase. For example
+`src/assets/images/events/3f2a9c1e-5b7d-4e2a-9c1e-5b7d4e2a9c1e.jpg`.
+Use 1200 × 900 (4:3). It shows on the event's card under "Upcoming events" and
+at the top of the event's page. Events without a photo show a plain navy card.
+New photos appear after the next deploy.
+
+## Partner logos
+
+Every image in `src/assets/images/partners/` shows in "Our partners" on the
+home page, in file-name order. The file name becomes the logo's alt text:
+`01-united-bank-for-africa.png` is read as "United Bank For Africa" (a leading
+number only sets the order). Use PNGs with a transparent background, about
+400 px wide. The row is hidden while the folder is empty.
+
 ## Videos
 
 | File name    | Where it appears                                              |

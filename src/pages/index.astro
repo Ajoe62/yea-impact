@@ -1,12 +1,13 @@
 ---
+import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import MediaImage from '../components/media/MediaImage.astro';
 import HeroSlideshow from '../components/HeroSlideshow.astro';
 import ImageMarquee from '../components/ImageMarquee.astro';
 import Stamp from '../components/Stamp.astro';
 import YouTubeEmbed from '../components/YouTubeEmbed.astro';
-import { findVideoSequence, heroImages, type ImageSlot } from '../lib/media';
-import { CONTACT_HREF, SIGNUP_HREF } from '../lib/site';
+import { findVideoSequence, heroImages, partnerLogos, type ImageSlot } from '../lib/media';
+import { CONTACT_EMAIL, CONTACT_HREF, DONATE_HREF, SIGNUP_HREF } from '../lib/site';
 import subscribeClip from '../assets/videos/yea-subscribe.mp4?url';
 
 // The home page has no database content, so it is built once as static HTML.
@@ -17,7 +18,7 @@ const heroClips = findVideoSequence('home-hero');
 const clips = heroClips.length > 0 ? heroClips : [subscribeClip];
 
 const stats = [
-  { value: '20M', label: 'Youths we aim to reach across Africa' },
+  { value: '10M', label: 'Youths we aim to reach across Africa' },
   { value: '12–40', label: 'Ages we work with' },
   { value: '7', label: 'Core areas of impact' },
 ];
@@ -77,6 +78,32 @@ const campaignFacts = [
   { myth: '“Cough syrup and tramadol are safe.”', fact: 'Misused, they cause addiction and overdose.' },
 ];
 
+const partnerMail = (subject: string) => `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}`;
+
+const partnerWays = [
+  {
+    title: 'Sponsorships',
+    text: 'Fund a programme, an event or a scholarship, and put skills and opportunities within reach of young people who need them.',
+    icon: 'M12 21s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 11c0 5.65-7 10-7 10Z',
+    href: partnerMail('Sponsorship enquiry'),
+    cta: 'Become a sponsor',
+  },
+  {
+    title: 'Collaborations',
+    text: 'Co-run workshops, campaigns and community outreach, bringing your expertise to the youths we serve.',
+    icon: 'M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM2 20a6 6 0 0 1 12 0m-2.5-5.2A6 6 0 0 1 22 20',
+    href: partnerMail('Collaboration enquiry'),
+    cta: 'Collaborate with us',
+  },
+  {
+    title: 'Partnerships',
+    text: 'Build a long-term partnership with YEA to grow lasting impact for youths and communities across Africa.',
+    icon: 'm11 17 2 2a1.4 1.4 0 0 0 2-2m-2-2 2.5 2.5a1.4 1.4 0 0 0 2-2l-3.9-3.9a2 2 0 0 0-2.8 0l-.9.9a1.4 1.4 0 0 1-2-2L9 6.5a4 4 0 0 1 5 0l.6.5a2 2 0 0 0 1.4.5H18m3 0v8h-2M3 7.5h3m-3 0v8h2l4 3.5a1.4 1.4 0 0 0 2-2',
+    href: partnerMail('Partnership enquiry'),
+    cta: 'Partner with us',
+  },
+];
+
 const gallery: { slot: ImageSlot; className: string }[] = [
   { slot: 'home-gallery-1', className: 'col-span-2 row-span-2' },
   { slot: 'home-gallery-2', className: '' },
@@ -96,6 +123,7 @@ const gallery: { slot: ImageSlot; className: string }[] = [
     buttons={[
       { label: 'Join YEA', href: SIGNUP_HREF },
       { label: 'Explore our programs', href: '/programs' },
+      { label: 'Support our vision', href: DONATE_HREF },
     ]}
   />
 
@@ -144,7 +172,7 @@ const gallery: { slot: ImageSlot; className: string }[] = [
         under-engaged and exposed to harmful content.
       </p>
       <p class="leading-relaxed text-ink/75">
-        Through advocacy, mindset reorientation and skills development, we aim to impact 20 million youths across
+        Through advocacy, mindset reorientation and skills development, we aim to impact 10 million youths across
         Africa.
       </p>
       <div class="flex flex-wrap gap-3 pt-2">
@@ -318,8 +346,59 @@ const gallery: { slot: ImageSlot; className: string }[] = [
     </div>
   </section>
 
+  <!-- Sponsorships, collaborations and partnerships -->
+  <section class="relative overflow-hidden bg-mist py-20 lg:py-28">
+    <div class="corner-tr opacity-90 max-md:hidden" aria-hidden="true"></div>
+    <div class="container-page relative space-y-12">
+      <div class="flex flex-wrap items-end justify-between gap-6">
+        <div class="max-w-2xl space-y-4">
+          <p class="eyebrow">Sponsorships, collaborations &amp; partnerships</p>
+          <h2 class="text-5xl text-brand-700 md:text-6xl">Partner with <em>YEA</em></h2>
+          <p class="text-lg leading-relaxed text-ink/75">
+            Reaching 10 million youths takes many hands. Whether you are a company, a foundation, a school or an
+            individual, there is a way to stand with Africa’s young people.
+          </p>
+        </div>
+        <a href={DONATE_HREF} class="btn-primary">Support our vision</a>
+      </div>
+
+      <ul class="grid gap-6 md:grid-cols-3">
+        {
+          partnerWays.map((p) => (
+            <li class="card card-accent flex flex-col gap-4 p-7">
+              <svg class="size-10 text-accent-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d={p.icon} />
+              </svg>
+              <h3 class="font-display text-3xl tracking-wide text-brand-700 uppercase">{p.title}</h3>
+              <p class="flex-1 leading-relaxed text-ink/70">{p.text}</p>
+              <a href={p.href} class="group inline-flex items-center gap-2 text-xs font-bold tracking-[0.14em] text-accent-500 uppercase">
+                {p.cta}
+                <svg class="size-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      {
+        partnerLogos.length > 0 && (
+          <div class="space-y-6">
+            <h3 class="text-sm font-bold tracking-[0.2em] text-brand-700 uppercase">Our partners</h3>
+            <ul class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+              {partnerLogos.map((logo) => (
+                <li class="card flex h-24 items-center justify-center p-4">
+                  <Image src={logo.image} alt={logo.name} title={logo.name} height={128} loading="lazy" class="max-h-full w-auto object-contain" />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
   <!-- Call to action -->
-  <section class="container-page pb-20 lg:pb-28">
+  <section class="container-page py-20 lg:py-28">
     <div class="on-dark relative overflow-hidden rounded-3xl bg-brand-700 px-6 py-14 text-white md:px-14 md:py-16">
       <div class="slash-right" aria-hidden="true"></div>
       <div class="relative max-w-3xl space-y-8">

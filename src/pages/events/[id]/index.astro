@@ -3,7 +3,9 @@ import { actions } from 'astro:actions';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import PageHero from '../../../components/PageHero.astro';
 import Notice from '../../../components/Notice.astro';
-import { formatDateTime } from '../../../lib/format';
+import { Image } from 'astro:assets';
+import { formatDateTime, isPast } from '../../../lib/format';
+import { findEventImage } from '../../../lib/media';
 
 const { id } = Astro.params;
 const { supabase, user } = Astro.locals;
@@ -17,10 +19,12 @@ const { data: event } = await supabase
 if (!event) return Astro.rewrite('/404');
 
 const result = Astro.getActionResult(actions.registerForEvent);
+const ended = isPast(event.event_date);
+const image = findEventImage(event.id);
 ---
 
 <BaseLayout title={event.title} description={event.description ?? undefined}>
-  <PageHero media="events-hero" alt="" eyebrow="Event" title={event.title} compact>
+  <PageHero media="events-hero" alt="" eyebrow={ended ? 'Past event' : 'Event'} title={event.title} compact>
     <p class="text-sm text-white/75">
       {formatDateTime(event.event_date)}
       {event.location && <> · {event.location}</>}
@@ -29,15 +33,34 @@ const result = Astro.getActionResult(actions.registerForEvent);
 
   <div class="container-page grid gap-10 py-12 lg:grid-cols-[1fr_22rem] lg:py-16">
     <div class="space-y-6">
+      {
+        image && (
+          <div class="aspect-4/3 overflow-hidden rounded-3xl shadow-xl shadow-brand-900/10 md:aspect-video">
+            <Image
+              src={image}
+              alt={event.title}
+              widths={image.width >= 800 ? [800, 1200, 1600].filter((w) => w <= image.width) : [image.width]}
+              sizes="(min-width: 1024px) 60vw, 100vw"
+              loading="eager"
+              class="h-full w-full object-cover"
+            />
+          </div>
+        )
+      }
       <h2 class="text-3xl text-brand-700 md:text-4xl">About this event</h2>
       <p class="text-lg leading-relaxed whitespace-pre-line text-ink/75">{event.description}</p>
     </div>
 
     <aside class="lg:sticky lg:top-24 lg:self-start">
       <div class="card space-y-4 p-6">
-        <h2 class="card-title text-lg text-brand-800">Register</h2>
+        <h2 class="card-title text-lg text-brand-800">{ended ? 'This event has ended' : 'Register'}</h2>
         {
-          result?.data ? (
+          ended ? (
+            <>
+              <p class="text-sm text-ink/70">Registration is closed. Take a look at what’s coming up next.</p>
+              <a href="/events" class="btn-outline w-full">See upcoming events</a>
+            </>
+          ) : result?.data ? (
             <div class="space-y-4">
               <Notice tone="success">You have successfully registered!</Notice>
               {result.data.qrUrl && (

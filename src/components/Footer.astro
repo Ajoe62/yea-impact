@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import logo from '../assets/images/logo-wordmark.png';
-import { CAC_NUMBER, CONTACT_EMAIL, CONTACT_HREF, ORG_NAME, SIGNUP_HREF } from '../lib/site';
+import { CAC_NUMBER, CONTACT_EMAIL, CONTACT_HREF, DONATE_HREF, ORG_NAME, SIGNUP_HREF } from '../lib/site';
 
 const year = new Date().getFullYear();
 const groups = [
@@ -12,6 +12,7 @@ const groups = [
       { href: '/courses', label: 'Courses' },
       { href: '/mentorship', label: 'Mentorship' },
       { href: SIGNUP_HREF, label: 'Join YEA' },
+      { href: DONATE_HREF, label: 'Support our vision' },
     ],
   },
   {

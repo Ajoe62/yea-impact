@@ -1,0 +1,114 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import { BANK_ACCOUNT, CONTACT_EMAIL } from '../lib/site';
+
+export const prerender = true;
+
+const funds = [
+  { title: 'Digital skills', text: 'Laptops, data and trainers for tech skills courses.' },
+  { title: 'Mentorship', text: 'Connecting young people with mentors who guide their growth.' },
+  { title: 'Outreach & campaigns', text: 'School visits, workshops and our drug abuse prevention campaign.' },
+  { title: 'Education support', text: 'Learning materials and scholarships for youths who need them most.' },
+];
+
+const details = [
+  { label: 'Bank', value: BANK_ACCOUNT.bank },
+  { label: 'Account name', value: BANK_ACCOUNT.name },
+  { label: 'Account number', value: BANK_ACCOUNT.number, copy: true },
+];
+
+const receiptHref = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Donation to YEA')}`;
+---
+
+<BaseLayout title="Support our vision" description="Donate to YEA and help empower 10 million young Africans.">
+  <PageHero
+    eyebrow="Donate"
+    title="Support our"
+    accent="vision"
+    subtitle="Every gift helps a young African build skills, find guidance and believe that better is possible."
+  />
+
+  <section class="container-page grid gap-12 py-14 lg:grid-cols-[1fr_28rem] lg:gap-16 lg:py-20">
+    <div class="space-y-8">
+      <div class="space-y-4">
+        <p class="eyebrow">Your gift at work</p>
+        <h2 class="text-4xl text-brand-700 md:text-5xl">Help us reach <em>10 million</em> youths</h2>
+        <p class="text-lg leading-relaxed text-ink/75">
+          Your donation goes directly into programmes that empower young people aged 12 to 40 through advocacy, mindset
+          reorientation and skills development.
+        </p>
+      </div>
+      <ul class="grid gap-4 sm:grid-cols-2">
+        {
+          funds.map((f) => (
+            <li class="card card-accent space-y-1.5 p-6">
+              <h3 class="card-title text-lg text-brand-800">{f.title}</h3>
+              <p class="text-sm leading-relaxed text-ink/70">{f.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <aside class="lg:sticky lg:top-24 lg:self-start">
+      <div class="on-dark relative overflow-hidden rounded-3xl bg-brand-700 p-7 text-white md:p-8">
+        <div class="slash-right opacity-50" aria-hidden="true"></div>
+        <div class="relative space-y-6">
+          <div class="space-y-2">
+            <p class="eyebrow eyebrow-on-dark">Bank transfer</p>
+            <h2 class="text-3xl md:text-4xl">Donate by transfer</h2>
+          </div>
+          <dl class="space-y-4">
+            {
+              details.map((d) => (
+                <div class="rounded-2xl bg-white/8 p-4 ring-1 ring-white/15">
+                  <dt class="text-xs font-bold tracking-[0.16em] text-blush uppercase">{d.label}</dt>
+                  <dd class="mt-1 flex items-center justify-between gap-3">
+                    <span class:list={['font-semibold text-white', d.copy ? 'font-mono text-2xl tracking-wider' : 'text-lg leading-snug']}>
+                      {d.value}
+                    </span>
+                    {d.copy && (
+                      <button
+                        type="button"
+                        class="shrink-0 rounded-full bg-white px-4 py-2 text-xs font-bold text-brand-700 transition hover:bg-blush focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                        data-copy={d.value}
+                        aria-label={`Copy ${d.label.toLowerCase()}`}
+                      >
+                        Copy
+                      </button>
+                    )}
+                  </dd>
+                </div>
+              ))
+            }
+          </dl>
+          <p class="text-sm leading-relaxed text-white/80">
+            After your transfer, email us at
+            <a href={receiptHref} class="font-semibold text-white underline decoration-accent-500 decoration-2 underline-offset-4">{CONTACT_EMAIL}</a>
+            with your name and amount so we can thank you and send a receipt.
+          </p>
+        </div>
+      </div>
+    </aside>
+  </section>
+</BaseLayout>
+
+<script>
+  function init() {
+    document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(button.dataset.copy!);
+          button.textContent = 'Copied!';
+        } catch {
+          button.textContent = 'Copy failed';
+        }
+        setTimeout(() => (button.textContent = 'Copy'), 2000);
+      });
+    });
+  }
+
+  init();
+  document.addEventListener('astro:after-swap', init);
+</script>

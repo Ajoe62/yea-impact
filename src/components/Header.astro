@@ -2,7 +2,7 @@
 import { actions } from 'astro:actions';
 import { Image } from 'astro:assets';
 import logo from '../assets/images/logo-wordmark.png';
-import { SIGNUP_HREF } from '../lib/site';
+import { DONATE_HREF, SIGNUP_HREF } from '../lib/site';
 
 const links = [
   { href: '/programs', label: 'Programs' },
@@ -52,12 +52,14 @@ const user = Astro.locals.user;
             <button class="btn-outline px-5 py-2.5" title={user.email}>Sign out</button>
           </form>
         ) : (
-          <>
-            <a href="/login" class="text-sm font-semibold text-brand-700 hover:text-accent-500">Sign in</a>
-            <a href={SIGNUP_HREF} class="btn-primary px-5 py-2.5">Join YEA</a>
-          </>
+          <a href="/login" class="text-sm font-semibold text-brand-700 hover:text-accent-500">Sign in</a>
         )
       }
+      {/* Short label until there is room for the full one beside the nav. */}
+      <a href={DONATE_HREF} class="btn-secondary px-5 py-2.5">
+        <span class="xl:hidden">Donate</span><span class="max-xl:hidden">Support our vision</span>
+      </a>
+      {!user && <a href={SIGNUP_HREF} class="btn-primary px-5 py-2.5">Join YEA</a>}
     </div>
 
     <button
@@ -102,6 +104,7 @@ const user = Astro.locals.user;
           </div>
         )
       }
+      <a href={DONATE_HREF} class="btn-secondary mt-3">Support our vision</a>
     </div>
   </nav>
 </header>

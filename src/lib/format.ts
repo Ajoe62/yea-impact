@@ -24,3 +24,12 @@ export const dateBadge = (value: string | null | undefined) => {
 
 /** Supabase returns a to-one join as an object or a one-item array depending on the schema. */
 export const one = <T,>(value: T | T[] | null | undefined): T | undefined => (Array.isArray(value) ? value[0] : (value ?? undefined));
+
+/** True once an event's day has passed. Undated events and events later today count as upcoming. */
+export const isPast = (value: string | null | undefined) => {
+  const d = toDate(value);
+  if (!d) return false;
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  return d < startOfToday;
+};

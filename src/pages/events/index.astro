@@ -1,50 +1,76 @@
 ---
+import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import EmptyState from '../../components/EmptyState.astro';
-import { dateBadge, formatDateTime } from '../../lib/format';
+import { dateBadge, formatDateTime, isPast } from '../../lib/format';
+import { findEventImage } from '../../lib/media';
 
 const supabase = Astro.locals.supabase;
 const { data: events } = supabase
   ? await supabase.from('events').select('id, title, description, event_date, location').order('event_date', { ascending: true })
   : { data: null };
+
+// Soonest first, undated (TBA) events last; past events most recent first.
+const upcoming = (events ?? []).filter((e) => !isPast(e.event_date));
+const past = (events ?? []).filter((e) => isPast(e.event_date)).reverse();
 ---
 
-<BaseLayout title="Events" description="Upcoming YEA events and workshops.">
+<BaseLayout title="Events" description="Upcoming and past YEA events and workshops.">
   <PageHero
     media="events-hero"
     alt="A YEA event"
     eyebrow="Events"
-    title="Upcoming events"
+    title="Events"
     subtitle="Workshops, meetups and gatherings. Register once and check in with your QR code."
   />
 
-  <section class="container-page py-14 lg:py-20">
+  <section class="container-page space-y-8 py-14 lg:py-20" aria-labelledby="upcoming-heading">
+    <div class="space-y-3">
+      <p class="eyebrow">Don’t miss out</p>
+      <h2 id="upcoming-heading" class="text-4xl text-brand-700 md:text-5xl">Upcoming <em>events</em></h2>
+    </div>
     {
-      events && events.length > 0 ? (
-        <ul class="space-y-4">
-          {events.map((event) => {
+      upcoming.length > 0 ? (
+        <ul class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {upcoming.map((event) => {
             const badge = dateBadge(event.event_date);
+            const image = findEventImage(event.id);
             return (
               <li>
-                <a href={`/events/${event.id}`} class="card group flex gap-5 p-5 transition hover:shadow-md md:p-6">
-                  <div class="flex size-16 shrink-0 flex-col items-center justify-center rounded-xl bg-brand-700 text-white">
-                    {badge ? (
-                      <>
-                        <span class="font-display text-2xl leading-none">{badge.day}</span>
-                        <span class="text-xs tracking-wide uppercase">{badge.month}</span>
-                      </>
+                <a href={`/events/${event.id}`} class="card card-accent group flex h-full flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-900/10">
+                  <div class="relative aspect-4/3 overflow-hidden bg-brand-700">
+                    {image ? (
+                      <Image
+                        src={image}
+                        alt=""
+                        widths={image.width >= 400 ? [400, 800, 1200].filter((w) => w <= image.width) : [image.width]}
+                        sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                        loading="lazy"
+                        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      />
                     ) : (
-                      <span class="text-xs">TBA</span>
+                      <div class="slash-right opacity-70" aria-hidden="true" />
                     )}
+                    <div class="absolute top-4 left-4 flex size-16 flex-col items-center justify-center rounded-xl bg-white text-brand-700 shadow-lg">
+                      {badge ? (
+                        <>
+                          <span class="font-display text-2xl leading-none">{badge.day}</span>
+                          <span class="text-xs tracking-wide uppercase">{badge.month}</span>
+                        </>
+                      ) : (
+                        <span class="text-xs font-bold">TBA</span>
+                      )}
+                    </div>
                   </div>
-                  <div class="min-w-0 flex-1 space-y-1">
-                    <h2 class="card-title text-lg text-brand-800 group-hover:text-brand-700">{event.title}</h2>
+                  <div class="flex flex-1 flex-col gap-2 p-6">
+                    <h3 class="card-title text-lg text-brand-800 group-hover:text-brand-700">{event.title}</h3>
                     <p class="text-sm text-ink/60">
                       {formatDateTime(event.event_date)}
                       {event.location && <> · {event.location}</>}
                     </p>
-                    <p class="line-clamp-2 text-sm text-ink/70">{event.description}</p>
+                    <p class="line-clamp-2 flex-1 text-sm text-ink/70">{event.description}</p>
+                    <span class="mt-2 text-xs font-bold tracking-[0.14em] text-accent-500 uppercase">View &amp; register</span>
                   </div>
                 </a>
               </li>
@@ -52,8 +78,49 @@ const { data: events } = supabase
           })}
         </ul>
       ) : (
-        <EmptyState message="There are no upcoming events at the moment." />
+        <EmptyState message="There are no upcoming events at the moment. Check back soon." />
       )
     }
+  </section>
+
+  <section class="border-t border-brand-900/8 bg-mist" aria-labelledby="past-heading">
+    <div class="container-page space-y-8 py-14 lg:py-20">
+      <div class="space-y-3">
+        <p class="eyebrow">Look back</p>
+        <h2 id="past-heading" class="text-4xl text-brand-700 md:text-5xl">Past <em>events</em></h2>
+      </div>
+      {
+        past.length > 0 ? (
+          <ul class="space-y-4">
+            {past.map((event) => {
+              const badge = dateBadge(event.event_date)!;
+              return (
+                <li>
+                  <a href={`/events/${event.id}`} class="card group flex gap-5 p-5 transition hover:shadow-md md:p-6">
+                    <div class="flex size-16 shrink-0 flex-col items-center justify-center rounded-xl bg-brand-900/8 text-brand-700">
+                      <span class="font-display text-2xl leading-none">{badge.day}</span>
+                      <span class="text-xs tracking-wide uppercase">{badge.month}</span>
+                    </div>
+                    <div class="min-w-0 flex-1 space-y-1">
+                      <div class="flex flex-wrap items-center gap-2">
+                        <h3 class="card-title text-lg text-brand-800/80 group-hover:text-brand-700">{event.title}</h3>
+                        <span class="rounded-full bg-brand-900/8 px-2.5 py-0.5 text-[0.7rem] font-bold tracking-wide text-ink/60 uppercase">Past event</span>
+                      </div>
+                      <p class="text-sm text-ink/60">
+                        {formatDateTime(event.event_date)}
+                        {event.location && <> · {event.location}</>}
+                      </p>
+                      <p class="line-clamp-2 text-sm text-ink/60">{event.description}</p>
+                    </div>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <EmptyState message="Past events will appear here." />
+        )
+      }
+    </div>
   </section>
 </BaseLayout>

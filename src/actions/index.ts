@@ -2,6 +2,7 @@ import { ActionError, defineAction, type ActionAPIContext } from 'astro:actions'
 import { z } from 'astro/zod';
 import type { AuthError, SupabaseClient } from '@supabase/supabase-js';
 import QRCode from 'qrcode';
+import { isPast } from '../lib/format';
 import { createSupabase, UNIQUE_VIOLATION } from '../lib/supabase';
 
 function requireSupabase(context: ActionAPIContext): SupabaseClient {
@@ -193,6 +194,9 @@ export const server = {
     handler: async ({ eventId }, context) => {
       const supabase = requireSupabase(context);
       const user = await requireUser(supabase, 'Please sign in to register.');
+      const { data: event } = await supabase.from('events').select('event_date').eq('id', eventId).single();
+      if (!event) throw new ActionError({ code: 'NOT_FOUND', message: 'This event no longer exists.' });
+      if (isPast(event.event_date)) throw new ActionError({ code: 'BAD_REQUEST', message: 'This event has ended.' });
       const token = crypto.randomUUID();
       const { error } = await supabase
         .from('event_registrations')
